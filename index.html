@@ -3,72 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>视译训练智能体</title>
+<title>交替传译训练智能体</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
 
-header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: #fff; padding: 16px 24px; text-align: center; flex-shrink: 0; }
+header { background: linear-gradient(135deg, #0d47a1, #1a237e); color: #fff; padding: 16px 24px; text-align: center; flex-shrink: 0; }
 header h1 { font-size: 22px; }
 header p { font-size: 13px; opacity: .85; margin-top: 2px; }
 
 .container { flex: 1; max-width: 860px; margin: 0 auto; padding: 16px; width: 100%; display: flex; flex-direction: column; }
 
+/* Skill info */
+#skillInfo { flex-shrink: 0; margin-bottom: 12px; }
+#skillInfo details { background: #fff; border-radius: 10px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); cursor: pointer; font-size: 13px; }
+#skillInfo summary { font-weight: 600; color: #0d47a1; }
+#skillInfo .info-content { margin-top: 8px; color: #555; line-height: 1.6; }
+#skillInfo .info-content li { margin-left: 18px; margin-bottom: 4px; }
+
 /* Settings bar */
 #settingsBar { background: #fff; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 13px; flex-shrink: 0; }
 #settingsBar select, #settingsBar input { padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; outline: none; }
-#settingsBar select:focus, #settingsBar input:focus { border-color: #1a73e8; }
+#settingsBar select:focus, #settingsBar input:focus { border-color: #0d47a1; }
 #settingsBar .label { color: #666; font-weight: 600; }
+.action-btn { background: transparent; border: 1px solid #0d47a1; color: #0d47a1; border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer; transition: all .2s; }
+.action-btn:hover { background: #e8eaf6; }
+.action-btn.secondary { border-color: #888; color: #666; }
+.action-btn.secondary:hover { background: #f5f5f5; }
 
 /* Chat area */
 #chatArea { flex: 1; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; overflow: hidden; min-height: 400px; }
 #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
-.msg { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; animation: fadeIn .3s; }
+.msg { max-width: 88%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; animation: fadeIn .3s; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-.msg-coach { align-self: flex-start; background: #f0f4ff; border-bottom-left-radius: 4px; }
-.msg-coach .name { font-size: 12px; font-weight: 700; color: #1a73e8; margin-bottom: 4px; }
-.msg-coach .source-tag { display: inline-block; font-size: 11px; background: #e8f0fe; color: #1a73e8; padding: 1px 8px; border-radius: 4px; margin-bottom: 6px; }
+.msg-coach { align-self: flex-start; background: #e8eaf6; border-bottom-left-radius: 4px; }
+.msg-coach .name { font-size: 12px; font-weight: 700; color: #283593; margin-bottom: 4px; }
+.msg-coach .tag { display: inline-block; font-size: 11px; background: #c5cae9; color: #283593; padding: 1px 8px; border-radius: 4px; margin-bottom: 6px; }
 
-.msg-user { align-self: flex-end; background: #1a73e8; color: #fff; border-bottom-right-radius: 4px; }
+.msg-user { align-self: flex-end; background: #0d47a1; color: #fff; border-bottom-right-radius: 4px; }
 .msg-user .name { font-size: 12px; font-weight: 700; opacity: .8; margin-bottom: 2px; }
-.msg-user .edit-hint { font-size: 11px; opacity: .6; margin-top: 4px; cursor: pointer; }
-.msg-user .edit-hint:hover { opacity: 1; }
 
 .msg-system { align-self: center; background: #fff3e0; color: #e65100; font-size: 13px; border-radius: 8px; padding: 8px 16px; max-width: 90%; text-align: center; }
 
-.msg-feedback { align-self: flex-start; background: #f1f8e9; border-bottom-left-radius: 4px; border-left: 3px solid #689f38; }
-.msg-feedback .name { font-size: 12px; font-weight: 700; color: #558b2f; margin-bottom: 4px; }
-.msg-feedback .score-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 6px 0; }
+.msg-feedback { align-self: flex-start; background: #f1f8e9; border-bottom-left-radius: 4px; border-left: 3px solid #558b2f; }
+.msg-feedback .name { font-size: 12px; font-weight: 700; color: #33691e; margin-bottom: 4px; }
+.msg-feedback .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; }
 .msg-feedback .score-item { font-size: 13px; }
 .msg-feedback .score-item strong { font-size: 15px; }
 .msg-feedback .good { color: #2e7d32; }
-.msg-feedback .mid { color: #f57f17; }
+.msg-feedback .mid { color: #e65100; }
 .msg-feedback .bad { color: #c62828; }
 .msg-feedback .model-trans { background: #e8f5e9; padding: 8px 12px; border-radius: 6px; margin-top: 6px; font-size: 13px; }
 
 /* Input area */
-#inputArea { border-top: 1px solid #e8eaed; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
-#inputArea textarea { flex: 1; border: 1px solid #d0d5dd; border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; resize: none; font-family: inherit; min-height: 42px; max-height: 120px; }
-#inputArea textarea:focus { border-color: #1a73e8; }
-#inputArea .btn-send { background: #1a73e8; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; font-weight: 600; transition: background .2s; white-space: nowrap; }
-#inputArea .btn-send:hover { background: #1557b0; }
-#inputArea .btn-send:disabled { background: #93b8f0; cursor: not-allowed; }
-
-.loading-dots::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
-@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
-
-/* Skill info card */
-#skillInfo { flex-shrink: 0; margin-bottom: 12px; }
-#skillInfo details { background: #fff; border-radius: 10px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); cursor: pointer; font-size: 13px; }
-#skillInfo summary { font-weight: 600; color: #1a73e8; }
-#skillInfo .info-content { margin-top: 8px; color: #555; line-height: 1.6; }
-#skillInfo .info-content li { margin-left: 18px; margin-bottom: 4px; }
-
-/* Buttons for actions */
-.action-btn { background: transparent; border: 1px solid #1a73e8; color: #1a73e8; border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin-right: 4px; transition: all .2s; }
-.action-btn:hover { background: #e8f0fe; }
+#inputArea { border-top: 1px solid #e8eaed; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; flex-wrap: wrap; }
+#inputArea textarea { flex: 1; border: 1px solid #d0d5dd; border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; resize: none; font-family: inherit; min-height: 42px; max-height: 120px; min-width: 200px; }
+#inputArea textarea:focus { border-color: #0d47a1; }
+.btn-send { background: #0d47a1; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; font-weight: 600; transition: background .2s; white-space: nowrap; }
+.btn-send:hover { background: #1565c0; }
+.btn-send:disabled { background: #90a4ae; cursor: not-allowed; }
+.btn-send.recording { background: #c62828; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
 .toast.show { opacity: 1; }
@@ -76,39 +73,40 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
 @media (max-width: 640px) {
   header h1 { font-size: 18px; }
   .container { padding: 10px; }
-  .msg { max-width: 92%; font-size: 13px; }
+  .msg { max-width: 95%; font-size: 13px; }
 }
-
-#apiConfig { display: none; }
-#apiConfig.show { display: flex; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>视译训练智能体</h1>
-  <p>Sight Translation AI Coach · 顺句驱动训练 · 人机协作 · 智能反馈</p>
+  <h1>交替传译训练智能体</h1>
+  <p>Consecutive Interpreting AI Coach · 听辨 · 记忆 · 表达</p>
 </header>
 
 <div class="container">
-  <!-- 技能说明（折叠） -->
   <div id="skillInfo">
     <details open>
       <summary>关于本智能体：训练什么技能？</summary>
       <div class="info-content">
-        <p><strong>训练目标：视译（Sight Translation）中的顺句驱动能力</strong></p>
-        <p>视译是口译的核心技能之一，要求译员在阅读源语文本的同时，快速将其转换为目标语并口头表达。</p>
+        <p><strong>训练目标：交替传译（Consecutive Interpreting）核心能力</strong></p>
+        <p>交替传译是口译的基本形式，译员在讲话人说完一段话后进行口头翻译。</p>
         <ul>
-          <li><strong>顺句驱动</strong>：按照源语的语序进行翻译，避免大的语序调整</li>
-          <li><strong>信息重组</strong>：在保持语序的前提下，使译文符合目标语表达习惯</li>
-          <li><strong>反应速度</strong>：从看到文本到开口翻译的时间间隔要短</li>
+          <li><strong>听辨理解</strong>：准确听取并理解源语信息</li>
+          <li><strong>短期记忆</strong>：在讲话人停顿时记住关键信息</li>
+          <li><strong>信息重组</strong>：快速将源语信息组织成目标语表达</li>
+          <li><strong>口头表达</strong>：清晰、流畅地输出译文</li>
         </ul>
-        <p style="margin-top:6px;color:#1a73e8;font-weight:600">点击下方「AI 设置」可配置 API Key 使用真实 AI 评估；留空则使用内置评估。</p>
+        <p style="margin-top:6px;color:#0d47a1;font-weight:600">
+          🔊 智能体用语音播报源语 → 你口头翻译 → 智能体评估反馈
+        </p>
+        <p style="font-size:12px;color:#888;margin-top:4px">
+          如需使用语音识别自动转写译文，请用 Chrome 浏览器。
+        </p>
       </div>
     </details>
   </div>
 
-  <!-- 设置栏 -->
   <div id="settingsBar">
     <span class="label">语言方向：</span>
     <select id="langDir"><option value="zh-en">中→英</option><option value="en-zh">英→中</option></select>
@@ -121,16 +119,18 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
     <select id="difficulty">
       <option value="easy">入门</option><option value="medium" selected>进阶</option><option value="hard">挑战</option>
     </select>
-    <button class="action-btn" onclick="toggleApiConfig()">AI 设置</button>
-    <button class="action-btn" onclick="resetChat()">重新开始</button>
-    <input type="text" id="apiKey" placeholder="API Key (留空=内置评估)" style="width:180px;display:none" />
+    <button class="action-btn" onclick="toggleApi()">AI Key</button>
+    <button class="action-btn secondary" onclick="resetChat()">重新开始</button>
+    <input type="password" id="apiKey" placeholder="API Key (留空=内置评估)" style="width:160px;display:none" />
   </div>
 
-  <!-- 聊天区 -->
   <div id="chatArea">
     <div id="messages"></div>
     <div id="inputArea">
-      <textarea id="userInput" rows="1" placeholder="在此输入你的译文..." oninput="autoResize(this)"></textarea>
+      <button class="btn-send" id="micBtn" onclick="toggleRecording()" title="点击开始录音口译">
+        🎤 开始口译
+      </button>
+      <textarea id="userInput" rows="1" placeholder="或手动输入译文..." oninput="autoResize(this)"></textarea>
       <button class="btn-send" id="sendBtn" onclick="sendMessage()">发送</button>
     </div>
   </div>
@@ -165,9 +165,13 @@ let state = {
   currentIdx: 0,
   round: 0,
   totalRounds: 0,
-  correctCount: 0,
-  history: JSON.parse(localStorage.getItem('stHistory2') || '[]'),
-  waitingForResponse: false
+  history: JSON.parse(localStorage.getItem('ciHistory') || '[]'),
+  waitingForResponse: false,
+  waitingForFirst: true,
+  isPlaying: false,
+  isRecording: false,
+  recognition: null,
+  transcriptBuffer: ''
 };
 
 // ========== 工具函数 ==========
@@ -183,19 +187,22 @@ function pickTexts() {
   const dir = document.getElementById('langDir').value;
   const topic = document.getElementById('topic').value;
   const diff = document.getElementById('difficulty').value;
-  const pool = (corpus[dir]?.[topic]?.[diff] || []).sort(() => Math.random() - 0.5);
-  return pool;
+  return (corpus[dir]?.[topic]?.[diff] || []).sort(() => Math.random() - 0.5);
 }
 
-function toggleApiConfig() {
+function toggleApi() {
   const k = document.getElementById('apiKey');
   k.style.display = k.style.display === 'none' ? 'inline-block' : 'none';
   if (k.style.display === 'none') { k.value = ''; state.usingMock = true; }
 }
 
 function scrollToBottom() {
-  const msgs = document.getElementById('messages');
-  setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 50);
+  setTimeout(() => { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }, 50);
+}
+
+function escapeHtml(t) {
+  const d = document.createElement('div');
+  d.textContent = t; return d.innerHTML;
 }
 
 function disableInput(disabled) {
@@ -208,7 +215,7 @@ function disableInput(disabled) {
 function addCoachMsg(html) {
   const div = document.createElement('div');
   div.className = 'msg msg-coach';
-  div.innerHTML = '<div class="name">视译教练</div>' + html;
+  div.innerHTML = '<div class="name">口译教练</div>' + html;
   document.getElementById('messages').appendChild(div);
   scrollToBottom();
 }
@@ -217,7 +224,7 @@ function addUserMsg(text) {
   const div = document.createElement('div');
   div.className = 'msg msg-user';
   const time = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
-  div.innerHTML = `<div class="name">我 (${time})</div><div>${escapeHtml(text)}</div>`;
+  div.innerHTML = `<div class="name">我 (口译) ${time}</div><div>${escapeHtml(text)}</div>`;
   document.getElementById('messages').appendChild(div);
   scrollToBottom();
 }
@@ -238,20 +245,123 @@ function addSystemMsg(text) {
   scrollToBottom();
 }
 
-function escapeHtml(text) {
-  const d = document.createElement('div');
-  d.textContent = text;
-  return d.innerHTML;
+// ========== TTS ==========
+function speakText(text, callback) {
+  if (!window.speechSynthesis) { toast('浏览器不支持语音合成'); if (callback) callback(); return; }
+
+  state.isPlaying = true;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.85;
+  utterance.pitch = 1;
+
+  const dir = document.getElementById('langDir').value;
+  if (dir === 'zh-en') { utterance.lang = 'zh-CN'; } else { utterance.lang = 'en-US'; }
+
+  // Try to find a good voice
+  const voices = speechSynthesis.getVoices();
+  const preferred = dir === 'zh-CN' ? voices.find(v => v.lang.startsWith('zh')) : voices.find(v => v.lang.startsWith('en'));
+  if (preferred) utterance.voice = preferred;
+
+  utterance.onend = function() { state.isPlaying = false; if (callback) callback(); };
+  utterance.onerror = function() { state.isPlaying = false; if (callback) callback(); };
+
+  speechSynthesis.speak(utterance);
+}
+
+// ========== 语音识别 ==========
+function initRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) return false;
+
+  state.recognition = new SpeechRecognition();
+  state.recognition.continuous = true;
+  state.recognition.interimResults = true;
+
+  const dir = document.getElementById('langDir').value;
+  state.recognition.lang = 'zh-CN';
+
+  state.recognition.onresult = function(event) {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const r = event.results[i];
+      if (r.isFinal) state.transcriptBuffer += r[0].transcript + ' ';
+      else interim += r[0].transcript;
+    }
+    const input = document.getElementById('userInput');
+    input.value = state.transcriptBuffer + interim;
+    autoResize(input);
+  };
+
+  state.recognition.onerror = function(event) {
+    console.warn('Speech recognition error:', event.error);
+    if (event.error === 'no-speech') { /* ignore */ }
+  };
+
+  return true;
+}
+
+function toggleRecording() {
+  if (state.isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+function startRecording() {
+  if (!initRecognition()) {
+    toast('语音识别不可用，请使用 Chrome 浏览器或手动输入');
+    return;
+  }
+
+  if (state.isPlaying) { toast('请等语音播报完再口译'); return; }
+
+  state.transcriptBuffer = '';
+  const input = document.getElementById('userInput');
+  input.value = '';
+  input.placeholder = '正在录音口译...';
+
+  try {
+    state.recognition.start();
+  } catch (e) {
+    // might already be started
+  }
+
+  state.isRecording = true;
+  const btn = document.getElementById('micBtn');
+  btn.textContent = '⏹ 停止录音';
+  btn.classList.add('recording');
+}
+
+function stopRecording() {
+  if (state.recognition) {
+    try { state.recognition.stop(); } catch(e) {}
+  }
+
+  state.isRecording = false;
+  const btn = document.getElementById('micBtn');
+  btn.textContent = '🎤 开始口译';
+  btn.classList.remove('recording');
+
+  const input = document.getElementById('userInput');
+  input.placeholder = '或手动输入译文...';
+
+  if (state.transcriptBuffer.trim()) {
+    // Auto-submit after a short delay
+    const text = state.transcriptBuffer.trim();
+    state.transcriptBuffer = '';
+    input.value = text;
+    autoResize(input);
+    setTimeout(() => sendMessage(), 300);
+  }
 }
 
 // ========== 训练流程 ==========
 function startTraining() {
   const msgs = document.getElementById('messages');
   msgs.innerHTML = '';
-
   state.round = 0;
   state.totalRounds = 0;
-  state.correctCount = 0;
   state.currentIdx = 0;
 
   const dir = document.getElementById('langDir').value;
@@ -261,42 +371,48 @@ function startTraining() {
   const topicEl = document.getElementById('topic');
   const topicLabel = topicEl.options[topicEl.selectedIndex].text;
 
-  addCoachMsg(`欢迎来到视译训练！<br><br>
-    <b>训练目标：</b>提升顺句驱动视译能力 — 按照源语语序快速口译，同时保证译文自然通顺<br>
+  addCoachMsg(`欢迎来到交替传译训练！<br><br>
+    <b>训练目标：</b>提升交替传译的听辨理解、短期记忆与口头表达能力<br>
     <b>当前设置：</b>${langLabel} · ${topicLabel} · ${diffLabel}<br><br>
-    我会逐句给你源语文本，你将其口译为目标语后输入即可。每轮我会给出评估反馈和示范译文。<br>
-    <span style="color:#888">准备好了吗？发送任意消息开始第一题！</span>`);
+    <b>训练流程：</b><br>
+    1️⃣ 智能体用语音播报一段源语（可戴耳机收听）<br>
+    2️⃣ 听完后点击「🎤 开始口译」用麦克风口译<br>
+    3️⃣ 语音识别会自动转写你的译文<br>
+    4️⃣ AI 评估你的口译质量并给出反馈<br><br>
+    <span style="color:#888">准备好就开始吧！点击下方按钮或发送消息开始第一题。</span>`);
 
   state.textsInTopic = pickTexts();
   state.currentText = state.textsInTopic[0] || '';
   state.waitingForFirst = true;
+  document.getElementById('userInput').value = '';
   disableInput(false);
-  document.getElementById('userInput').focus();
 }
 
 function presentNextText() {
-  if (state.textsInTopic.length === 0) {
-    state.textsInTopic = pickTexts();
-  }
-
+  if (state.textsInTopic.length === 0) state.textsInTopic = pickTexts();
   state.currentIdx++;
-  if (state.currentIdx >= state.textsInTopic.length) {
-    state.textsInTopic = pickTexts();
-    state.currentIdx = 0;
-  }
+  if (state.currentIdx >= state.textsInTopic.length) { state.textsInTopic = pickTexts(); state.currentIdx = 0; }
   state.currentText = state.textsInTopic[state.currentIdx];
   state.round++;
 
   const dir = document.getElementById('langDir').value;
   const langLabel = dir === 'zh-en' ? '【中→英】' : '【英→中】';
 
-  addCoachMsg(`<span class="source-tag">第 ${state.round} 题 ${langLabel}</span><br>
-    <b>源语文本：</b><br>
-    <span style="font-size:16px">${escapeHtml(state.currentText)}</span><br><br>
-    <span style="color:#888;font-size:13px">请将上述文本口译为目标语，输入你的译文：</span>`);
+  addCoachMsg(`<span class="tag">第 ${state.round} 题 ${langLabel}</span>
+    <b>请听语音播报：</b><br>
+    <span style="font-size:15px">${escapeHtml(state.currentText)}</span><br>
+    <span style="color:#888;font-size:12px">🔊 语音正在播报...</span>`);
 
-  disableInput(false);
-  document.getElementById('userInput').focus();
+  // Speak the text, then enable input
+  disableInput(true);
+  document.getElementById('micBtn').disabled = true;
+
+  speakText(state.currentText, function() {
+    addCoachMsg(`<span style="color:#0d47a1">✅ 播报完毕！请点击「🎤 开始口译」进行口译，或在下方输入框中手动输入你的译文。</span>`);
+    disableInput(false);
+    document.getElementById('micBtn').disabled = false;
+    document.getElementById('userInput').focus();
+  });
 }
 
 // ========== 发送消息 ==========
@@ -305,7 +421,7 @@ async function sendMessage() {
 
   const input = document.getElementById('userInput');
   const text = input.value.trim();
-  if (!text) return;
+  if (!text) { toast('请输入或口译你的译文'); return; }
 
   if (state.waitingForFirst) {
     state.waitingForFirst = false;
@@ -316,9 +432,9 @@ async function sendMessage() {
 
   input.value = '';
   autoResize(input);
-
   addUserMsg(text);
   disableInput(true);
+  document.getElementById('micBtn').disabled = true;
 
   const key = document.getElementById('apiKey').value.trim();
   state.usingMock = !key;
@@ -344,34 +460,23 @@ function genMockScores(userText, source) {
   const total = Math.round((acc + flu + lang + comp) / 4);
 
   let fb = '';
-  if (acc >= 88) fb += '✅ 信息准确度高，核心信息完整传达。';
-  else if (acc >= 72) fb += '⚠️ 主要信息已传达，部分细节可以更精确。';
-  else fb += '❌ 信息有较多遗漏或偏差，建议对照原文逐句核对。';
+  if (acc >= 88) fb += '✅ 信息准确度高，关键信息完整传达。';
+  else if (acc >= 72) fb += '⚠️ 主要信息已传达，部分细节可进一步精确。';
+  else fb += '❌ 信息有遗漏或偏差，建议对照原文检查。';
 
-  if (flu >= 85) fb += ' 表达流畅自然，符合顺句驱动原则。';
-  else if (flu >= 70) fb += ' 整体较流畅，部分句式可以更紧凑。';
-  else fb += ' 流畅度需提高，建议多做顺句驱动练习。';
+  if (flu >= 85) fb += ' 表达流畅自然，符合目标语习惯。';
+  else if (flu >= 70) fb += ' 整体流畅，部分表达可更简洁。';
+  else fb += ' 流畅度需提高，注意减少口头禅和停顿。';
 
   if (comp >= 85) fb += ' 信息完整，没有明显遗漏。';
   else if (comp >= 70) fb += ' 主要信息已覆盖，个别细节可补充。';
-  else fb += ' 信息完整性不足，注意把握句子主干。';
+  else fb += ' 信息完整性不足，建议加强听辨和笔记训练。';
 
-  const model = genMockModel(source);
-  return { accuracy: acc, fluency: flu, language: lang, completeness: comp, total, feedback: fb, modelTranslation: model };
-}
+  const modelHint = source.length > 30
+    ? '（参考反馈中的建议优化表达）'
+    : '（可对照原文思考更优译法）';
 
-function genMockModel(source) {
-  const models = {
-    "中国经济在过去四十年里保持了高速增长。": "China's economy has maintained rapid growth over the past four decades.",
-    "国际贸易对全球经济发展具有重要意义。": "International trade plays a significant role in global economic development.",
-    "许多国家正在加强区域经济合作。": "Many countries are strengthening regional economic cooperation.",
-    "Global trade plays a vital role in economic development.": "全球贸易在经济发展中发挥着重要作用。",
-    "Small businesses are the backbone of many economies.": "小企业是许多经济体的支柱。",
-    "Inflation affects the purchasing power of consumers.": "通货膨胀影响着消费者的购买力。"
-  };
-  return models[source] || source.length > 20
-    ? '(示范译文：参考上方反馈中的建议，尝试在顺句驱动和信息重组之间找到最佳平衡。)'
-    : '(示范译文略)';
+  return { accuracy: acc, fluency: flu, language: lang, completeness: comp, total, feedback: fb, modelTranslation: modelHint };
 }
 
 // ========== AI 评估 ==========
@@ -381,33 +486,35 @@ async function doAIEval(userText) {
   const dir = document.getElementById('langDir').value;
   const langPair = dir === 'zh-en' ? '中文→英文' : '英文→中文';
 
-  const prompt = `你是一位专业的口译评估导师。请评估这段视译练习。
+  const prompt = `你是一位专业的口译评估导师。请评估一段交替传译练习。
 
-源语文本：${state.currentText}
-用户译文：${userText}
+讲话人原文：${state.currentText}
+译员口译：${userText}
 语言方向：${langPair}
-训练技能：视译（顺句驱动）
 
-请从以下四个维度评分（0-100），并给出详细反馈：
+请从口译评估的专业角度评分（0-100）：
 1. 信息准确度：译文是否准确传达原文信息
-2. 表达流畅度：译文是否符合目标语表达习惯
+2. 表达流畅度：口头表达是否自然流畅
 3. 语言质量：用词语法是否规范
 4. 信息完整性：有无重要遗漏
 
-同时给出一个示范译文。
+同时给出一个参考译文和改进建议。
 
 以 JSON 格式输出：
-{"accuracy":数字,"fluency":数字,"language":数字,"completeness":数字,"total":平均分,"feedback":"详细中文反馈","modelTranslation":"示范译文"}`;
+{"accuracy":数字,"fluency":数字,"language":数字,"completeness":数字,"total":平均分,"feedback":"详细中文反馈和改进口译建议","modelTranslation":"参考译文"}`;
 
   try {
     const resp = await fetch(apiUrl + '/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', messages: [
-          { role: 'system', content: '你是一名专业口译评估导师。请严格按JSON格式输出。' },
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: '你是一名专业的口译评估导师。严格按JSON格式输出中文反馈。' },
           { role: 'user', content: prompt }
-        ], temperature: 0.3, max_tokens: 1500
+        ],
+        temperature: 0.3,
+        max_tokens: 1500
       })
     });
 
@@ -417,12 +524,11 @@ async function doAIEval(userText) {
     const content = data.choices?.[0]?.message?.content || '';
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     const result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-
     if (!result || typeof result.accuracy !== 'number') throw new Error('格式错误');
 
     showFeedback(result, userText, result.modelTranslation || '');
   } catch (err) {
-    toast('AI 评估失败，使用内置评估：' + err.message);
+    toast('AI 评估失败，使用内置评估');
     doMockEval(userText);
   }
 }
@@ -431,32 +537,31 @@ async function doAIEval(userText) {
 function showFeedback(scores, userText, modelTrans) {
   const total = scores.total || Math.round((scores.accuracy + scores.fluency + scores.language + scores.completeness) / 4);
 
-  const scoreClass = (s) => s >= 85 ? 'good' : s >= 70 ? 'mid' : 'bad';
+  const cls = (s) => s >= 85 ? 'good' : s >= 70 ? 'mid' : 'bad';
 
   let html = `
     <div class="score-row">
-      <span class="score-item">信息准确度：<strong class="${scoreClass(scores.accuracy)}">${scores.accuracy}</strong></span>
-      <span class="score-item">表达流畅度：<strong class="${scoreClass(scores.fluency)}">${scores.fluency}</strong></span>
-      <span class="score-item">语言质量：<strong class="${scoreClass(scores.language)}">${scores.language}</strong></span>
-      <span class="score-item">信息完整性：<strong class="${scoreClass(scores.completeness)}">${scores.completeness}</strong></span>
+      <span class="score-item">📊 信息准确度：<strong class="${cls(scores.accuracy)}">${scores.accuracy}</strong></span>
+      <span class="score-item">表达流畅度：<strong class="${cls(scores.fluency)}">${scores.fluency}</strong></span>
+      <span class="score-item">语言质量：<strong class="${cls(scores.language)}">${scores.language}</strong></span>
+      <span class="score-item">信息完整性：<strong class="${cls(scores.completeness)}">${scores.completeness}</strong></span>
       <span class="score-item">综合：<strong>${total}</strong></span>
     </div>
-    <div style="margin:8px 0">${escapeHtml(scores.feedback || '暂无反馈')}</div>`;
+    <div style="margin:8px 0">${escapeHtml(scores.feedback || '')}</div>`;
 
   if (modelTrans) {
-    html += `<div class="model-trans"><strong>示范译文：</strong>${escapeHtml(modelTrans)}</div>`;
+    html += `<div class="model-trans"><strong>📝 参考译文：</strong>${escapeHtml(modelTrans)}</div>`;
   }
 
   html += `<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
     <button class="action-btn" onclick="presentNextText()">下一题 →</button>
-    <button class="action-btn" onclick="skipToReflect()">本次总结</button>
+    <button class="action-btn secondary" onclick="showSummary()">本次训练总结</button>
   </div>`;
 
   addFeedbackMsg(html);
 
   state.totalRounds++;
 
-  // 保存到历史
   state.history.push({
     time: new Date().toLocaleString('zh-CN'),
     langDir: document.getElementById('langDir').value,
@@ -466,33 +571,36 @@ function showFeedback(scores, userText, modelTrans) {
     scores: { accuracy: scores.accuracy, fluency: scores.fluency, language: scores.language, completeness: scores.completeness, total },
     modelTranslation: modelTrans || ''
   });
-  localStorage.setItem('stHistory2', JSON.stringify(state.history));
+  localStorage.setItem('ciHistory', JSON.stringify(state.history));
 
+  document.getElementById('micBtn').disabled = false;
   disableInput(false);
 }
 
-function skipToReflect() {
-  const last = state.history[state.history.length - 1];
-  if (!last) { toast('暂无训练数据'); return; }
-  const avg = last.scores.total;
-  const total = state.totalRounds;
+function showSummary() {
+  const last5 = state.history.slice(-5);
+  if (last5.length === 0) { toast('暂无数据'); return; }
+  const avg = Math.round(last5.reduce((a, r) => a + r.scores.total, 0) / last5.length);
 
-  let comment = avg >= 85 ? '表现优秀！顺句驱动能力扎实。' : avg >= 70 ? '表现良好，有提升空间，继续保持训练。' : '还需要加强基础训练，建议从入门难度开始。';
+  let comment = avg >= 85 ? '🎉 表现优秀！交替传译能力扎实。' : avg >= 70 ? '👍 表现良好，坚持训练会有更大提升。' : '💪 继续加油，建议从入门难度开始，打好听辨基础。';
 
-  addCoachMsg(`<b>本轮训练小结</b><br><br>
-    已完成 ${total} 题练习<br>
-    最近一题综合评分：<b>${avg}</b> 分<br><br>
+  addCoachMsg(`<b>训练小结</b><br><br>
+    已完成 <b>${state.totalRounds}</b> 题<br>
+    近5题平均分：<b>${avg}</b><br><br>
     ${comment}<br><br>
-    <span style="color:#888">可以继续训练或点击「重新开始」切换设置。</span>`);
+    <span style="color:#888">可以继续训练，或点击「重新开始」切换主题/难度。</span>`);
 }
 
 function resetChat() {
-  if (state.totalRounds > 0 && !confirm('确定重新开始？当前训练记录会保留。')) return;
+  if (state.totalRounds > 0 && !confirm('确定重新开始？训练记录会保留。')) return;
   state.waitingForFirst = true;
   startTraining();
 }
 
-// ========== 初始化 ==========
+// ========== 初始化语音支持 + 启动 ==========
+if (window.speechSynthesis) {
+  speechSynthesis.getVoices(); // trigger voice loading
+}
 startTraining();
 </script>
 </body>
