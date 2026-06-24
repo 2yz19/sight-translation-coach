@@ -260,134 +260,128 @@ const corpus = {
   }
 };
 
-// ========== 评估引擎 ==========
+// ========== 评估引擎（严格版）==========
 const evalEngine = {
-  // 核心评估函数：基于参考译文对比
   evaluate: function(userText, sourceText, langDir, refTranslation) {
+    const user = userText.trim().toLowerCase();
+    const ref = refTranslation.trim().toLowerCase();
     const scores = { accuracy: 0, fluency: 0, language: 0, completeness: 0, total: 0 };
     const details = [];
 
+    // 检测乱说（跟原文/参考译文完全不沾边）
+    const overlap = this.calcOverlap(user, ref, langDir);
+
+    if (overlap < 0.05) {
+      scores.accuracy = 8; scores.fluency = 15; scores.language = 12; scores.completeness = 5;
+      scores.total = 10;
+      return { scores, feedback: '❌ 你的口译与参考译文几乎没有重合内容。请认真听取源语并尝试传达核心信息。建议从入门难度开始练习，先确保听辨理解正确。', details: ['译文与参考译文不匹配，可能需要重新听取源语'] };
+    }
+
+    if (overlap < 0.15) {
+      scores.accuracy = 18; scores.fluency = 25; scores.language = 22; scores.completeness = 15;
+      scores.total = 20;
+      return { scores, feedback: '❌ 信息准确度很低，大量核心信息未传达。建议反复听取源语，抓住关键词和句子主干后再开口。', details: ['关键词匹配率过低，请对照原文检查理解是否正确'] };
+    }
+
     if (langDir === 'zh-en') {
-      // 中文→英文评估
-      const result = this.evaluateZhEn(userText, refTranslation, sourceText);
-      scores.accuracy = result.accuracy;
-      scores.fluency = result.fluency;
-      scores.language = result.language;
-      scores.completeness = result.completeness;
+      const result = this.evaluateZhEn(user, ref, sourceText, userText.trim(), refTranslation.trim());
+      Object.assign(scores, result.scores);
       details.push(...result.details);
     } else {
-      // 英文→中文评估
-      const result = this.evaluateEnZh(userText, refTranslation, sourceText);
-      scores.accuracy = result.accuracy;
-      scores.fluency = result.fluency;
-      scores.language = result.language;
-      scores.completeness = result.completeness;
+      const result = this.evaluateEnZh(user, ref, sourceText, userText.trim(), refTranslation.trim());
+      Object.assign(scores, result.scores);
       details.push(...result.details);
     }
 
     scores.total = Math.round((scores.accuracy + scores.fluency + scores.language + scores.completeness) / 4);
-
-    // 生成反馈文本
     const feedback = this.generateFeedback(scores, details);
     return { scores, feedback, details };
   },
 
-  // 中→英评估
-  evaluateZhEn: function(userText, ref, sourceText) {
-    const userWords = this.tokenizeEnglish(userText.toLowerCase());
-    const refWords = this.tokenizeEnglish(ref.toLowerCase());
-    const sourceChars = sourceText.replace(/[\s，。、；：！？""''（）【】]/g, '');
-
-    // 1. 信息准确度：基于关键内容词重叠
-    const contentWords = refWords.filter(w => w.length > 2 && !this.isStopWord(w));
-    const userContentWords = userWords.filter(w => w.length > 2 && !this.isStopWord(w));
-    const matchedContent = contentWords.filter(w => userContentWords.includes(w));
-    const accRatio = contentWords.length > 0 ? matchedContent.length / contentWords.length : 0;
-
-    // 2. 流畅度：基于句子长度比例和连接词使用
-    const lenRatio = userWords.length / Math.max(refWords.length, 1);
-    const fluencyScore = this.calcFluency(lenRatio, userWords);
-
-    // 3. 语言质量：基于词法多样性
-    const uniqueRatio = new Set(userWords).size / Math.max(userWords.length, 1);
-    const langScore = Math.min(98, Math.round(55 + uniqueRatio * 45));
-
-    // 4. 完整性：基于译文/原文长度比
-    const completenessRatio = Math.min(userWords.length / Math.max(sourceChars.length / 2, 1) * 1.2, 1.2);
-    const completenessScore = this.calcCompleteness(completenessRatio);
-
-    const accuracy = Math.min(98, Math.round(50 + accRatio * 50));
-    const fluency = Math.min(98, fluencyScore);
-
-    const details = [];
-    if (accRatio < 0.5) details.push('关键术语或核心信息有遗漏，建议对照参考译文检查');
-    else if (accRatio < 0.75) details.push('主要信息已传达，部分术语可以更精确');
-    else details.push('关键信息覆盖较好');
-
-    if (fluency < 70) details.push('表达可以更流畅，注意句式结构的自然转换');
-    else if (fluency >= 85) details.push('表达流畅自然，语序处理得当');
-
-    if (completenessRatio < 0.5) details.push('译文长度明显不足，可能有较多信息遗漏');
-    else if (completenessRatio > 1.3) details.push('译文偏长，可以更简洁');
-
-    return { accuracy, fluency, language: langScore, completeness: completenessScore, details };
+  calcOverlap: function(user, ref, langDir) {
+    if (langDir === 'zh-en') {
+      const uWords = user.split(/[\s,.;:!?'"()-]+/).filter(w => w.length > 0);
+      const rWords = ref.split(/[\s,.;:!?'"()-]+/).filter(w => w.length > 0);
+      if (uWords.length === 0 || rWords.length === 0) return 0;
+      const contentR = rWords.filter(w => w.length > 2);
+      if (contentR.length === 0) return uWords.length / Math.max(rWords.length, 1) * 0.3;
+      const matched = contentR.filter(w => uWords.includes(w));
+      return matched.length / contentR.length;
+    } else {
+      const uChars = user.replace(/\s/g, '');
+      const rChars = ref.replace(/\s/g, '');
+      if (uChars.length === 0 || rChars.length === 0) return 0;
+      const rBigrams = [];
+      for (let i = 0; i < rChars.length - 1; i++) rBigrams.push(rChars.substring(i, i+2));
+      const uBigrams = [];
+      for (let i = 0; i < uChars.length - 1; i++) uBigrams.push(uChars.substring(i, i+2));
+      if (rBigrams.length === 0) return uChars.length / Math.max(rChars.length, 1) * 0.2;
+      const matched = rBigrams.filter(b => uBigrams.includes(b));
+      return matched.length / rBigrams.length;
+    }
   },
 
-  // 英→中评估
-  evaluateEnZh: function(userText, ref, sourceText) {
-    const userChars = userText.replace(/[\s，。、；：！？""''（）【】]/g, '');
-    const refChars = ref.replace(/[\s，。、；：！？""''（）【】]/g, '');
-    const sourceWords = sourceText.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  evaluateZhEn: function(userLow, refLow, sourceOrig, userOrig, refOrig) {
+    const userWords = userLow.split(/[\s,.;:!?'"()-]+/).filter(w => w.length > 0);
+    const refWords = refLow.split(/[\s,.;:!?'"()-]+/).filter(w => w.length > 0);
 
-    // 1. 信息准确度：基于中文关键词
-    const refTokens = this.tokenizeChinese(ref);
-    const userTokens = this.tokenizeChinese(userText);
-    const matched = refTokens.filter(t => userTokens.includes(t));
-    const accRatio = refTokens.length > 0 ? matched.length / refTokens.length : 0;
+    if (userWords.length === 0) return { scores: { accuracy: 5, fluency: 10, language: 10, completeness: 5 }, details: ['未检测到有效译文'] };
 
-    // 2. 流畅度
-    const lenRatio = userChars.length / Math.max(refChars.length, 1);
-    const fluencyScore = Math.min(98, Math.round(60 + (1 - Math.abs(1 - lenRatio)) * 35));
+    const contentR = refWords.filter(w => w.length > 2 && !this.isStopWord(w));
+    const contentU = userWords.filter(w => w.length > 2 && !this.isStopWord(w));
+    const matched = contentR.filter(w => contentU.includes(w));
+    const accRatio = contentR.length > 0 ? matched.length / contentR.length : 0;
 
-    // 3. 语言质量
-    const uniqueRatio = new Set(userTokens).size / Math.max(userTokens.length, 1);
-    const langScore = Math.min(98, Math.round(50 + uniqueRatio * 45));
-
-    // 4. 完整性
-    const completenessRatio = Math.min(userChars.length / Math.max(refChars.length, 1) * 1.1, 1.2);
-    const completenessScore = Math.min(98, Math.round(55 + completenessRatio * 40));
-
-    const accuracy = Math.min(98, Math.round(45 + accRatio * 55));
-    const fluency = Math.min(98, fluencyScore);
-    const completeness = Math.min(98, completenessScore);
+    const lenRatio = userWords.length / Math.max(refWords.length, 1);
+    const accuracy = Math.max(5, Math.round(accRatio * 95 - 5));
+    const fluency = Math.max(5, Math.round(80 - Math.abs(1 - lenRatio) * 60 - (accRatio < 0.3 ? 20 : 0)));
+    const uniqueRatio = Math.min(new Set(userWords).size / Math.max(userWords.length, 1) * 1.2, 1);
+    const language = Math.max(5, Math.round(20 + uniqueRatio * 70));
+    const completeness = Math.max(5, Math.round(Math.min(lenRatio, 1.3) / 1.3 * 95));
 
     const details = [];
-    if (accRatio < 0.5) details.push('关键信息有遗漏，建议对照原文检查术语和核心信息');
-    else if (accRatio < 0.75) details.push('主要信息已传达，个别表达可更精确');
-    else details.push('信息传达准确');
+    if (accRatio >= 0.8) details.push('关键信息覆盖好');
+    else if (accRatio >= 0.5) details.push('部分关键信息已传达，可以更精确');
+    else details.push('关键信息遗漏较多，建议仔细听取源语中的核心词汇');
 
-    if (lenRatio < 0.6) details.push('译文偏短，可能有信息遗漏');
-    else if (lenRatio > 1.3) details.push('译文偏长，可以更简洁');
+    const realLenRatio = userOrig.length / Math.max(refOrig.length, 1);
+    if (realLenRatio < 0.3) details.push('译文过短，有大量信息未传达');
+    else if (realLenRatio > 1.5) details.push('译文偏长，可以更简洁精炼');
 
-    return { accuracy, fluency, language: langScore, completeness, details };
+    return { scores: { accuracy, fluency, language, completeness }, details };
+  },
+
+  evaluateEnZh: function(userLow, refLow, sourceOrig, userOrig, refOrig) {
+    const userChars = userOrig.replace(/\s/g, '');
+    const refChars = refOrig.replace(/\s/g, '');
+    if (userChars.length === 0) return { scores: { accuracy: 5, fluency: 10, language: 10, completeness: 5 }, details: ['未检测到有效译文'] };
+
+    const rBigrams = []; for (let i = 0; i < refChars.length - 1; i++) rBigrams.push(refChars.substring(i, i+2));
+    const uBigrams = []; for (let i = 0; i < userChars.length - 1; i++) uBigrams.push(userChars.substring(i, i+2));
+
+    const matched = rBigrams.filter(b => uBigrams.includes(b));
+    const accRatio = rBigrams.length > 0 ? matched.length / rBigrams.length : 0;
+    const lenRatio = userChars.length / Math.max(refChars.length, 1);
+
+    const accuracy = Math.max(5, Math.round(accRatio * 95 - 5));
+    const fluency = Math.max(5, Math.round(80 - Math.abs(1 - lenRatio) * 55 - (accRatio < 0.3 ? 25 : 0)));
+    const uniqueRatio = Math.min(new Set(userChars).size / Math.max(userChars.length, 1) * 1.1, 1);
+    const language = Math.max(5, Math.round(18 + uniqueRatio * 72));
+    const completeness = Math.max(5, Math.round(Math.min(lenRatio, 1.3) / 1.3 * 90));
+
+    const details = [];
+    if (accRatio >= 0.8) details.push('信息传达准确');
+    else if (accRatio >= 0.5) details.push('主要信息已传达，部分表达可更精准');
+    else details.push('信息遗漏较多，建议加强听辨训练');
+
+    if (lenRatio < 0.3) details.push('译文太短，大量信息未译出');
+    else if (lenRatio > 1.5) details.push('译文偏长，可以更简洁');
+
+    return { scores: { accuracy, fluency, language, completeness }, details };
   },
 
   tokenizeEnglish: function(text) {
     return text.split(/[\s,.;:!?'"()-]+/).filter(w => w.length > 0);
-  },
-
-  tokenizeChinese: function(text) {
-    const tokens = [];
-    // 简单分词：提取2字词和单个实词
-    for (let i = 0; i < text.length - 1; i++) {
-      const bigram = text.substring(i, i + 2);
-      if (/[\u4e00-\u9fff]/.test(bigram)) tokens.push(bigram);
-    }
-    // 也加入单个汉字
-    for (const ch of text) {
-      if (/[\u4e00-\u9fff]/.test(ch)) tokens.push(ch);
-    }
-    return tokens;
   },
 
   isStopWord: function(w) {
@@ -398,47 +392,24 @@ const evalEngine = {
       'he','him','his','she','her','not','no'].includes(w);
   },
 
-  calcFluency: function(lenRatio, words) {
-    let score = 75;
-    const penalty = Math.abs(1 - lenRatio) * 25;
-    score -= penalty;
-    // 检查连接词使用
-    const connectors = ['and','but','however','therefore','moreover','furthermore','while','although','because','so'];
-    const hasConnectors = connectors.some(c => words.includes(c));
-    if (hasConnectors) score += 5;
-    return Math.min(98, Math.max(40, Math.round(score)));
-  },
-
-  calcCompleteness: function(ratio) {
-    if (ratio >= 0.8 && ratio <= 1.2) return Math.round(75 + (1 - Math.abs(1 - ratio)) * 25);
-    if (ratio > 0.5 && ratio < 0.8) return Math.round(55 + (ratio - 0.5) * 60);
-    return Math.round(40 + ratio * 20);
-  },
-
   generateFeedback: function(scores, details) {
-    const total = scores.total;
+    const t = scores.total;
     let fb = '';
-
-    if (total >= 85) fb = '🎉 整体表现优秀！';
-    else if (total >= 70) fb = '👍 表现良好，有提升空间。';
-    else if (total >= 55) fb = '💪 基础尚可，需要加强训练。';
-    else fb = '📚 建议从入门难度重新开始，打好基础。';
-
-    if (details.length > 0) {
-      fb += ' ' + details.join('；') + '。';
+    if (t >= 85) fb = '🎉 整体表现优秀！口译质量高。';
+    else if (t >= 70) fb = '👍 表现良好，部分维度还有提升空间。';
+    else if (t >= 50) fb = '💪 基础尚可，需要加强薄弱环节。';
+    else if (t >= 30) fb = '📚 需要大幅加强，建议从入门难度开始重新训练。';
+    else fb = '❌ 译文与源语有较大差距，建议重新听取源语，抓住核心信息再尝试。';
+    if (details.length > 0) fb += ' ' + details.join('；') + '。';
+    if (t >= 50) {
+      const im = [];
+      if (scores.accuracy < 60) im.push('重点提高信息准确度，听取核心词汇');
+      if (scores.fluency < 60) im.push('提升表达流畅度，注意句式自然转换');
+      if (scores.completeness < 60) im.push('加强信息完整性，做好笔记辅助记忆');
+      if (scores.language < 60) im.push('注意语言质量和词汇积累');
+      if (im.length > 0) fb += ' 改进建议：' + im.join('；') + '。';
+      else fb += ' 继续保持训练节奏！';
     }
-
-    const improvements = [];
-    if (scores.accuracy < 70) improvements.push('建议对照参考译文，重点检查核心信息的传达');
-    if (scores.fluency < 70) improvements.push('多做顺句驱动练习，提升表达流畅度');
-    if (scores.completeness < 70) improvements.push('加强听辨和笔记训练，确保信息完整');
-    if (scores.language < 70) improvements.push('注意词汇积累和语法规范');
-    if (improvements.length > 0) {
-      fb += ' 改进建议：' + improvements.join('；') + '。';
-    } else {
-      fb += ' 继续保持训练节奏！';
-    }
-
     return fb;
   }
 };
@@ -655,15 +626,14 @@ function presentNextText() {
   const langLabel = dir === 'zh-en' ? '【中→英】' : '【英→中】';
 
   addCoachMsg(`<span class="tag">第 ${state.round} 题 ${langLabel}</span>
-    <b>请听语音播报：</b><br>
-    <span style="font-size:15px">${escapeHtml(state.currentText)}</span><br>
-    <span style="color:#888;font-size:12px">🔊 语音正在播报...</span>`);
+    <b>🔊 语音正在播报源语，请仔细听辨...</b><br>
+    <span style="color:#888;font-size:12px">（原文将在你口译完成后展示，模拟真实交传场景）</span>`);
 
   disableInput(true);
   document.getElementById('micBtn').disabled = true;
 
   speakText(state.currentText, function() {
-    addCoachMsg(`<span style="color:#0d47a1">✅ 播报完毕！请点击「🎤 开始口译」或手动输入译文。</span>`);
+    addCoachMsg(`<span style="color:#0d47a1">✅ 播报完毕！现在凭记忆进行口译。请点击「🎤 开始口译」或手动输入译文。</span>`);
     disableInput(false);
     document.getElementById('micBtn').disabled = false;
     document.getElementById('userInput').focus();
@@ -710,6 +680,7 @@ function showFeedback(scores, userText, refTranslation, feedback, details) {
   }
 
   let html = `
+    <div class="model-trans" style="border-left-color:#0d47a1;background:#e8eaf6"><strong>🔊 源语原文：</strong>${escapeHtml(state.currentText)}</div>
     <div class="score-row">
       <span class="score-item">📊 信息准确度：<strong class="${cls(scores.accuracy)}">${scores.accuracy}</strong></span>
       <span class="score-item">表达流畅度：<strong class="${cls(scores.fluency)}">${scores.fluency}</strong></span>
