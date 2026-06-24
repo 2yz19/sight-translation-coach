@@ -7,21 +7,15 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
-
 header { background: linear-gradient(135deg, #0d47a1, #1a237e); color: #fff; padding: 16px 24px; text-align: center; flex-shrink: 0; }
 header h1 { font-size: 22px; }
 header p { font-size: 13px; opacity: .85; margin-top: 2px; }
-
 .container { flex: 1; max-width: 860px; margin: 0 auto; padding: 16px; width: 100%; display: flex; flex-direction: column; }
-
-/* Skill info */
 #skillInfo { flex-shrink: 0; margin-bottom: 12px; }
 #skillInfo details { background: #fff; border-radius: 10px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); cursor: pointer; font-size: 13px; }
 #skillInfo summary { font-weight: 600; color: #0d47a1; }
 #skillInfo .info-content { margin-top: 8px; color: #555; line-height: 1.6; }
 #skillInfo .info-content li { margin-left: 18px; margin-bottom: 4px; }
-
-/* Settings bar */
 #settingsBar { background: #fff; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 13px; flex-shrink: 0; }
 #settingsBar select, #settingsBar input { padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; outline: none; }
 #settingsBar select:focus, #settingsBar input:focus { border-color: #0d47a1; }
@@ -30,23 +24,16 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
 .action-btn:hover { background: #e8eaf6; }
 .action-btn.secondary { border-color: #888; color: #666; }
 .action-btn.secondary:hover { background: #f5f5f5; }
-
-/* Chat area */
 #chatArea { flex: 1; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; overflow: hidden; min-height: 400px; }
 #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
 .msg { max-width: 88%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; animation: fadeIn .3s; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
 .msg-coach { align-self: flex-start; background: #e8eaf6; border-bottom-left-radius: 4px; }
 .msg-coach .name { font-size: 12px; font-weight: 700; color: #283593; margin-bottom: 4px; }
 .msg-coach .tag { display: inline-block; font-size: 11px; background: #c5cae9; color: #283593; padding: 1px 8px; border-radius: 4px; margin-bottom: 6px; }
-
 .msg-user { align-self: flex-end; background: #0d47a1; color: #fff; border-bottom-right-radius: 4px; }
 .msg-user .name { font-size: 12px; font-weight: 700; opacity: .8; margin-bottom: 2px; }
-
 .msg-system { align-self: center; background: #fff3e0; color: #e65100; font-size: 13px; border-radius: 8px; padding: 8px 16px; max-width: 90%; text-align: center; }
-
 .msg-feedback { align-self: flex-start; background: #f1f8e9; border-bottom-left-radius: 4px; border-left: 3px solid #558b2f; }
 .msg-feedback .name { font-size: 12px; font-weight: 700; color: #33691e; margin-bottom: 4px; }
 .msg-feedback .score-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; }
@@ -56,8 +43,7 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
 .msg-feedback .mid { color: #e65100; }
 .msg-feedback .bad { color: #c62828; }
 .msg-feedback .model-trans { background: #e8f5e9; padding: 8px 12px; border-radius: 6px; margin-top: 6px; font-size: 13px; }
-
-/* Input area */
+.msg-feedback .detail-box { background: #fffde7; padding: 8px 12px; border-radius: 6px; margin-top: 6px; font-size: 13px; border-left: 3px solid #f9a825; }
 #inputArea { border-top: 1px solid #e8eaed; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; flex-wrap: wrap; }
 #inputArea textarea { flex: 1; border: 1px solid #d0d5dd; border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; resize: none; font-family: inherit; min-height: 42px; max-height: 120px; min-width: 200px; }
 #inputArea textarea:focus { border-color: #0d47a1; }
@@ -66,22 +52,17 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
 .btn-send:disabled { background: #90a4ae; cursor: not-allowed; }
 .btn-send.recording { background: #c62828; animation: pulse 1s infinite; }
 @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
 .toast.show { opacity: 1; }
-
-@media (max-width: 640px) {
-  header h1 { font-size: 18px; }
-  .container { padding: 10px; }
-  .msg { max-width: 95%; font-size: 13px; }
-}
+.api-badge { font-size: 11px; background: #e8eaf6; color: #283593; padding: 2px 8px; border-radius: 4px; }
+@media (max-width: 640px) { header h1 { font-size: 18px; } .container { padding: 10px; } .msg { max-width: 95%; font-size: 13px; } }
 </style>
 </head>
 <body>
 
 <header>
   <h1>交替传译训练智能体</h1>
-  <p>Consecutive Interpreting AI Coach · 听辨 · 记忆 · 表达</p>
+  <p>Consecutive Interpreting AI Coach · 听辨 · 记忆 · 表达 · 内置 AI 评估</p>
 </header>
 
 <div class="container">
@@ -98,10 +79,11 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
           <li><strong>口头表达</strong>：清晰、流畅地输出译文</li>
         </ul>
         <p style="margin-top:6px;color:#0d47a1;font-weight:600">
-          🔊 智能体用语音播报源语 → 你口头翻译 → 智能体评估反馈
+          🔊 智能体语音播报源语 → 你口头翻译 → 智能体自动评估
         </p>
         <p style="font-size:12px;color:#888;margin-top:4px">
-          如需使用语音识别自动转写译文，请用 Chrome 浏览器。
+          ✅ 内置真实评估引擎，无需 API Key，完全免费<br>
+          💡 如需更强评估，点击「AI Key」填入 OpenAI 兼容 Key
         </p>
       </div>
     </details>
@@ -121,13 +103,14 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
     </select>
     <button class="action-btn" onclick="toggleApi()">AI Key</button>
     <button class="action-btn secondary" onclick="resetChat()">重新开始</button>
-    <input type="password" id="apiKey" placeholder="API Key (留空=内置评估)" style="width:160px;display:none" />
+    <input type="password" id="apiKey" placeholder="API Key (可选)" style="width:150px;display:none" />
+    <span id="evalMode" class="api-badge">评估模式：内置引擎</span>
   </div>
 
   <div id="chatArea">
     <div id="messages"></div>
     <div id="inputArea">
-      <button class="btn-send" id="micBtn" onclick="toggleRecording()" title="点击开始录音口译">
+      <button class="btn-send" id="micBtn" onclick="toggleRecording()">
         🎤 开始口译
       </button>
       <textarea id="userInput" rows="1" placeholder="或手动输入译文..." oninput="autoResize(this)"></textarea>
@@ -139,28 +122,332 @@ header p { font-size: 13px; opacity: .85; margin-top: 2px; }
 <div class="toast" id="toast"></div>
 
 <script>
-// ========== 语料库 ==========
+// ========== 语料库 + 参考译文 ==========
 const corpus = {
   'zh-en': {
-    economy: { easy: ["中国经济在过去四十年里保持了高速增长。","国际贸易对全球经济发展具有重要意义。","许多国家正在加强区域经济合作。"], medium: ["在当前全球经济复苏乏力的背景下，各国央行纷纷采取宽松货币政策以刺激经济增长。","供应链的多元化和数字化转型正在重塑国际贸易格局，这对发展中国家既是机遇也是挑战。","区域全面经济伙伴关系协定（RCEP）的签署标志着亚太地区经济一体化迈出了关键一步。"], hard: ["在通胀压力与增长放缓的双重挑战下，各国政府需要在财政纪律与经济刺激之间寻求微妙的平衡，这对政策制定者的智慧提出了极高要求。","全球价值链的重构正在加速推进，地缘政治因素与技术创新共同驱动着这一趋势，企业必须重新评估其生产布局和市场策略。","数字经济的蓬勃发展正在重新定义传统的贸易模式，跨境数据流动的规则制定已成为新一轮国际贸易谈判的焦点议题。"] },
-    technology: { easy: ["人工智能正在改变我们的生活方式。","智能手机已经成为人们日常生活中不可或缺的工具。","科技创新是推动社会进步的重要力量。"], medium: ["人工智能在医疗诊断领域的应用正在快速发展，有望大幅提高疾病的早期诊断率。","量子计算技术的突破将为药物研发和材料科学带来革命性的变化。","数字化转型已经成为企业提升竞争力的核心战略，云计算和大数据技术在其中扮演着关键角色。"], hard: ["随着生成式人工智能技术的日趋成熟，关于其对就业市场结构性影响的讨论日益热烈，如何在推动技术创新与保障劳动者权益之间取得平衡成为各国面临的重要课题。","半导体产业的全球布局正经历深刻调整，技术主权与供应链安全的考量促使主要经济体纷纷加大本土芯片制造的投入力度。","脑机接口技术从实验室走向临床应用的过程中，不仅面临技术层面的挑战，更涉及深刻的伦理问题和监管框架的建构。"] },
-    environment: { easy: ["保护环境是我们每个人的责任。","可再生能源的利用有助于减少碳排放。","植树造林对于改善生态环境非常重要。"], medium: ["气候变化已经成为全球面临的最紧迫挑战之一，各国需要共同努力减少温室气体排放。","循环经济模式通过资源的再利用和再循环，为实现可持续发展提供了新的路径。","海洋塑料污染问题日益严重，国际社会正在加强合作寻求解决方案。"], hard: ["在实现碳中和目标的过程中，能源结构的转型不仅涉及技术变革，更需要政策体系、市场机制和社会共识的协同推进。","生物多样性的丧失与气候变化的叠加效应正在对全球生态系统造成前所未有的压力，保护区的建设和生态廊道的修复迫在眉睫。","碳边境调节机制的实施引发了关于公平贸易与气候正义的激烈辩论，发展中国家对这一机制可能带来的贸易壁垒表示深切关注。"] },
-    diplomacy: { easy: ["和平与发展是当今时代的主题。","世界各国应该加强对话与合作。","中国坚持走和平发展道路。"], medium: ["多边主义是维护国际秩序和国际关系基本准则的重要基石。","联合国在应对全球性挑战中发挥着不可替代的作用。","一带一路倡议促进了沿线国家的基础设施建设和经济合作。"], hard: ["在百年未有之大变局下，大国关系的复杂性日益凸显，竞争与合作交织并存，构建新型国际关系成为当务之急。","全球治理体系的改革已成为国际社会的普遍共识，新兴经济体和发展中国家在国际事务中的代表性和发言权亟待提升。","数字主权概念的兴起正在改变传统的地缘政治格局，各国围绕数据治理和网络安全的规则制定展开了激烈博弈。"] },
-    culture: { easy: ["文化交流是增进各国人民相互了解的重要桥梁。","中国传统节日蕴含着丰富的文化内涵。","教育是传承文化的重要途径。"], medium: ["非物质文化遗产的保护不仅需要政府的支持，更需要年轻一代的参与和传承。","跨文化沟通能力在全球化时代变得越来越重要，它不仅仅是语言能力的问题。","数字技术为传统文化的传播和保护提供了新的可能性。"], hard: ["在全球化与本土化的张力中，文化身份的建构成为一个复杂而动态的过程，各国都在努力维护文化多样性的同时推动文化创新。","文化软实力作为国家综合国力的重要组成部分，其影响力不仅取决于文化产品的输出，更在于价值观和叙事体系的吸引力。","人工智能生成内容对版权和创意产业的冲击正在引发深刻的文化政策讨论，如何在促进技术创新与保护创作者权益之间找到平衡点是一个紧迫的议题。"] }
-    },
+    economy: { easy: [
+      ["中国经济在过去四十年里保持了高速增长。", "China's economy has maintained rapid growth over the past four decades."],
+      ["国际贸易对全球经济发展具有重要意义。", "International trade is of great significance to global economic development."],
+      ["许多国家正在加强区域经济合作。", "Many countries are strengthening regional economic cooperation."]
+    ], medium: [
+      ["在当前全球经济复苏乏力的背景下，各国央行纷纷采取宽松货币政策以刺激经济增长。", "Against the backdrop of weak global economic recovery, central banks around the world have adopted loose monetary policies to stimulate economic growth."],
+      ["供应链的多元化和数字化转型正在重塑国际贸易格局。", "The diversification and digital transformation of supply chains are reshaping the landscape of international trade."],
+      ["区域全面经济伙伴关系协定的签署标志着亚太经济一体化迈出了关键一步。", "The signing of RCEP marks a critical step forward in Asia-Pacific economic integration."]
+    ], hard: [
+      ["在通胀压力与增长放缓的双重挑战下，各国政府需要在财政纪律与经济刺激之间寻求微妙的平衡。", "Under the dual challenges of inflationary pressure and slowing growth, governments need to strike a delicate balance between fiscal discipline and economic stimulus."],
+      ["全球价值链的重构正在加速推进，地缘政治因素与技术创新共同驱动着这一趋势。", "The restructuring of global value chains is accelerating, driven by both geopolitical factors and technological innovation."],
+      ["数字经济的蓬勃发展正在重新定义传统的贸易模式。", "The booming digital economy is redefining traditional trade models."]
+    ] },
+    technology: { easy: [
+      ["人工智能正在改变我们的生活方式。", "Artificial intelligence is changing the way we live."],
+      ["智能手机已经成为人们日常生活中不可或缺的工具。", "Smartphones have become an indispensable tool in people's daily lives."],
+      ["科技创新是推动社会进步的重要力量。", "Technological innovation is an important force driving social progress."]
+    ], medium: [
+      ["人工智能在医疗诊断领域的应用正在快速发展。", "The application of AI in medical diagnosis is developing rapidly."],
+      ["量子计算技术的突破将为药物研发带来革命性的变化。", "Breakthroughs in quantum computing will bring revolutionary changes to drug development."],
+      ["数字化转型已经成为企业提升竞争力的核心战略。", "Digital transformation has become a core strategy for enterprises to enhance competitiveness."]
+    ], hard: [
+      ["随着生成式人工智能技术的日趋成熟，关于其对就业市场结构性影响的讨论日益热烈。", "As generative AI technology matures, discussions about its structural impact on the job market are intensifying."],
+      ["半导体产业的全球布局正经历深刻调整。", "The global landscape of the semiconductor industry is undergoing profound adjustments."],
+      ["脑机接口技术从实验室走向临床应用面临技术层面和伦理问题的双重挑战。", "Brain-computer interface technology faces dual challenges of technical and ethical issues as it moves from labs to clinical application."]
+    ] },
+    environment: { easy: [
+      ["保护环境是我们每个人的责任。", "Protecting the environment is the responsibility of every one of us."],
+      ["可再生能源的利用有助于减少碳排放。", "The use of renewable energy helps reduce carbon emissions."],
+      ["植树造林对于改善生态环境非常重要。", "Afforestation is very important for improving the ecological environment."]
+    ], medium: [
+      ["气候变化已经成为全球面临的最紧迫挑战之一。", "Climate change has become one of the most urgent challenges facing the world."],
+      ["循环经济模式为实现可持续发展提供了新的路径。", "The circular economy model provides a new path for achieving sustainable development."],
+      ["海洋塑料污染问题日益严重，国际社会正在加强合作寻求解决方案。", "The problem of plastic pollution in the oceans is getting worse, and the international community is strengthening cooperation to find solutions."]
+    ], hard: [
+      ["在实现碳中和目标的过程中，能源结构的转型需要政策体系、市场机制和社会共识的协同推进。", "In achieving carbon neutrality, the transformation of the energy structure requires coordinated efforts of policy systems, market mechanisms, and social consensus."],
+      ["生物多样性的丧失与气候变化正在对全球生态系统造成前所未有的压力。", "The loss of biodiversity and climate change are putting unprecedented pressure on global ecosystems."],
+      ["碳边境调节机制的实施引发了关于公平贸易与气候正义的激烈辩论。", "The implementation of carbon border adjustment mechanisms has sparked intense debate over fair trade and climate justice."]
+    ] },
+    diplomacy: { easy: [
+      ["和平与发展是当今时代的主题。", "Peace and development are the themes of our times."],
+      ["世界各国应该加强对话与合作。", "Countries around the world should strengthen dialogue and cooperation."],
+      ["中国坚持走和平发展道路。", "China adheres to the path of peaceful development."]
+    ], medium: [
+      ["多边主义是维护国际秩序和国际关系基本准则的重要基石。", "Multilateralism is an important cornerstone for maintaining the international order and basic norms of international relations."],
+      ["联合国在应对全球性挑战中发挥着不可替代的作用。", "The United Nations plays an irreplaceable role in addressing global challenges."],
+      ["一带一路倡议促进了沿线国家的基础设施建设和经济合作。", "The Belt and Road Initiative has promoted infrastructure construction and economic cooperation among countries along the route."]
+    ], hard: [
+      ["在百年未有之大变局下，大国关系的复杂性日益凸显，构建新型国际关系成为当务之急。", "Amid changes unseen in a century, the complexity of major-power relations is increasingly evident, making it urgent to build a new type of international relations."],
+      ["全球治理体系的改革已成为国际社会的普遍共识。", "The reform of the global governance system has become a common consensus of the international community."],
+      ["数字主权概念的兴起正在改变传统的地缘政治格局。", "The rise of the concept of digital sovereignty is changing the traditional geopolitical landscape."]
+    ] },
+    culture: { easy: [
+      ["文化交流是增进各国人民相互了解的重要桥梁。", "Cultural exchange is an important bridge for enhancing mutual understanding among peoples."],
+      ["中国传统节日蕴含着丰富的文化内涵。", "Traditional Chinese festivals contain rich cultural connotations."],
+      ["教育是传承文化的重要途径。", "Education is an important way to pass on culture."]
+    ], medium: [
+      ["非物质文化遗产的保护需要年轻一代的参与和传承。", "The protection of intangible cultural heritage requires the participation and inheritance of the younger generation."],
+      ["跨文化沟通能力在全球化时代变得越来越重要。", "Cross-cultural communication skills are becoming increasingly important in the era of globalization."],
+      ["数字技术为传统文化的传播和保护提供了新的可能性。", "Digital technology offers new possibilities for the dissemination and protection of traditional culture."]
+    ], hard: [
+      ["在全球化与本土化的张力中，文化身份的建构成为一个复杂而动态的过程。", "In the tension between globalization and localization, the construction of cultural identity has become a complex and dynamic process."],
+      ["文化软实力的影响力不仅取决于文化产品的输出，更在于价值观的吸引力。", "The influence of cultural soft power depends not only on the export of cultural products, but also on the appeal of values."],
+      ["人工智能生成内容对版权和创意产业的冲击正在引发深刻的文化政策讨论。", "The impact of AI-generated content on copyright and creative industries is sparking profound cultural policy discussions."]
+    ] }
+  },
   'en-zh': {
-    economy: { easy: ["Global trade plays a vital role in economic development.","Small businesses are the backbone of many economies.","Inflation affects the purchasing power of consumers."], medium: ["Central banks around the world are carefully navigating the delicate balance between controlling inflation and supporting economic growth.","The rise of digital currencies is challenging traditional banking systems and prompting regulators to develop new frameworks.","Supply chain resilience has become a top priority for governments and corporations alike in the wake of recent global disruptions."], hard: ["The interplay between fiscal stimulus measures and monetary policy tightening creates a complex macroeconomic environment that requires careful calibration by policymakers.","The ongoing transformation of global financial architecture, driven by the emergence of new economic powers and technological innovation, is reshaping international capital flows.","Trade fragmentation along geopolitical lines poses significant risks to global economic stability, potentially leading to efficiency losses and reduced welfare gains from globalization."] },
-    technology: { easy: ["The internet has changed the way we communicate.","Technology plays a key role in modern education.","Electric vehicles are becoming more popular around the world."], medium: ["Artificial intelligence is revolutionizing industries ranging from healthcare to financial services.","The development of 5G networks is enabling new applications in autonomous driving and smart cities.","Cybersecurity has become a critical concern for both governments and businesses in the digital age."], hard: ["The rapid advancement of large language models has sparked intense debate about the potential risks and benefits of artificial general intelligence, prompting calls for responsible AI governance.","The convergence of biotechnology and information technology is opening up new frontiers in personalized medicine, while raising profound ethical questions about genetic privacy and human enhancement.","Quantum supremacy represents a paradigm shift in computational capability, with far-reaching implications for cryptography, drug discovery, and materials science."] },
-    environment: { easy: ["Protecting the environment is essential for future generations.","Solar and wind energy are clean sources of power.","Reducing waste is important for a sustainable future."], medium: ["The transition to a low-carbon economy requires significant investments in renewable energy infrastructure.","Nature-based solutions offer cost-effective ways to address climate change and biodiversity loss simultaneously.","Corporate sustainability reporting is becoming increasingly important for investors and stakeholders."], hard: ["The concept of planetary boundaries highlights the urgent need to align economic activities with the Earth's ecological limits, requiring a fundamental rethinking of our growth paradigms.","Climate adaptation strategies must be integrated into urban planning and infrastructure development to build resilience against increasingly frequent extreme weather events.","The tension between economic development and environmental conservation is particularly acute in developing countries, where the pursuit of poverty reduction must be reconciled with climate commitments."] },
-    diplomacy: { easy: ["Dialogue is the best way to resolve international disputes.","Cultural exchange programs help build bridges between nations.","International cooperation is essential for addressing global challenges."], medium: ["The rules-based international order is facing unprecedented challenges from multiple directions.","Public diplomacy has become an increasingly important tool for countries to project soft power.","Regional multilateral institutions are playing a growing role in global governance."], hard: ["The diffusion of power in the international system is creating both opportunities and challenges for global governance, as traditional and emerging powers navigate a more complex geopolitical landscape.","Strategic competition in the Indo-Pacific region is intensifying, with implications for regional security architectures and economic integration frameworks.","The weaponization of economic interdependence through sanctions and export controls is reshaping the dynamics of international relations."] },
-    culture: { easy: ["Music and art are universal languages that connect people.","Learning about different cultures broadens our horizons.","Festivals around the world celebrate diverse cultural traditions."], medium: ["Cultural heritage preservation faces new challenges in the digital age, from copyright issues to digital divide concerns.","The global popularity of K-pop and other cultural exports demonstrates the power of cultural soft power.","Museums are increasingly using digital technologies to make their collections more accessible to global audiences."], hard: ["The tension between cultural homogenization and cultural diversification in the age of global streaming platforms raises fundamental questions about cultural sovereignty and identity preservation.","Repatriation of cultural artifacts has become a major issue in international cultural relations, reflecting broader debates about colonial legacies and restorative justice.","The intersection of artificial intelligence and creative industries is challenging traditional notions of authorship and creativity."] }
+    economy: { easy: [
+      ["Global trade plays a vital role in economic development.", "全球贸易在经济发展中发挥着重要作用。"],
+      ["Small businesses are the backbone of many economies.", "小企业是许多经济体的支柱。"],
+      ["Inflation affects the purchasing power of consumers.", "通货膨胀影响消费者的购买力。"]
+    ], medium: [
+      ["Central banks around the world are carefully navigating the balance between controlling inflation and supporting growth.", "世界各地的央行正在谨慎地在控制通胀和支持增长之间寻求平衡。"],
+      ["The rise of digital currencies is challenging traditional banking systems.", "数字货币的崛起正在挑战传统银行体系。"],
+      ["Supply chain resilience has become a top priority for governments and corporations.", "供应链韧性已成为政府和企业的首要任务。"]
+    ], hard: [
+      ["The interplay between fiscal stimulus and monetary tightening creates a complex macroeconomic environment.", "财政刺激与货币紧缩之间的相互作用造成了复杂的宏观经济环境。"],
+      ["The transformation of global financial architecture is reshaping international capital flows.", "全球金融架构的转型正在重塑国际资本流动。"],
+      ["Trade fragmentation along geopolitical lines poses risks to global economic stability.", "地缘政治因素导致的贸易碎片化对全球经济稳定构成风险。"]
+    ] },
+    technology: { easy: [
+      ["The internet has changed the way we communicate.", "互联网改变了我们沟通的方式。"],
+      ["Technology plays a key role in modern education.", "技术在现代教育中发挥着关键作用。"],
+      ["Electric vehicles are becoming more popular around the world.", "电动汽车在全球范围内越来越受欢迎。"]
+    ], medium: [
+      ["Artificial intelligence is revolutionizing industries from healthcare to financial services.", "人工智能正在从医疗到金融服务等各个行业引发革命。"],
+      ["The development of 5G networks is enabling new applications in autonomous driving.", "5G网络的发展正在为自动驾驶带来新的应用。"],
+      ["Cybersecurity has become a critical concern in the digital age.", "网络安全已成为数字时代的一个关键问题。"]
+    ], hard: [
+      ["The rapid advancement of large language models has sparked debate about the risks and benefits of AI.", "大语言模型的快速发展引发了关于人工智能风险和收益的讨论。"],
+      ["The convergence of biotechnology and IT is opening new frontiers in personalized medicine.", "生物技术与信息技术的融合正在为个性化医疗开辟新前沿。"],
+      ["Quantum supremacy has far-reaching implications for cryptography and drug discovery.", "量子优越性对密码学和药物研发具有深远影响。"]
+    ] },
+    environment: { easy: [
+      ["Protecting the environment is essential for future generations.", "保护环境对于子孙后代至关重要。"],
+      ["Solar and wind energy are clean sources of power.", "太阳能和风能是清洁能源。"],
+      ["Reducing waste is important for a sustainable future.", "减少浪费对于可持续的未来很重要。"]
+    ], medium: [
+      ["The transition to a low-carbon economy requires significant investments in renewable energy.", "向低碳经济转型需要对可再生能源进行大量投资。"],
+      ["Nature-based solutions offer cost-effective ways to address climate change.", "基于自然的解决方案提供了应对气候变化的经济有效的方法。"],
+      ["Corporate sustainability reporting is increasingly important for investors.", "企业可持续发展报告对投资者来说越来越重要。"]
+    ], hard: [
+      ["The concept of planetary boundaries highlights the need to align economic activities with ecological limits.", "地球边界概念强调需要使经济活动与生态极限保持一致。"],
+      ["Climate adaptation strategies must be integrated into urban planning.", "气候适应战略必须纳入城市规划。"],
+      ["The tension between development and conservation is acute in developing countries.", "发展与保护之间的矛盾在发展中国家尤为突出。"]
+    ] },
+    diplomacy: { easy: [
+      ["Dialogue is the best way to resolve international disputes.", "对话是解决国际争端的最佳方式。"],
+      ["Cultural exchange programs help build bridges between nations.", "文化交流项目有助于在国家之间架起桥梁。"],
+      ["International cooperation is essential for addressing global challenges.", "国际合作对于应对全球挑战至关重要。"]
+    ], medium: [
+      ["The rules-based international order is facing unprecedented challenges.", "基于规则的国际秩序正面临前所未有的挑战。"],
+      ["Public diplomacy has become an important tool for countries to project soft power.", "公共外交已成为各国展示软实力的重要工具。"],
+      ["Regional multilateral institutions are playing a growing role in global governance.", "区域多边机构在全球治理中发挥着越来越大的作用。"]
+    ], hard: [
+      ["The diffusion of power in the international system is creating both opportunities and challenges.", "国际体系中的权力分散既带来机遇也带来挑战。"],
+      ["Strategic competition in the Indo-Pacific region is intensifying.", "印太地区的战略竞争正在加剧。"],
+      ["The weaponization of economic interdependence is reshaping international relations.", "经济相互依存的武器化正在重塑国际关系。"]
+    ] },
+    culture: { easy: [
+      ["Music and art are universal languages that connect people.", "音乐和艺术是连接人们的通用语言。"],
+      ["Learning about different cultures broadens our horizons.", "了解不同文化开阔了我们的视野。"],
+      ["Festivals around the world celebrate diverse cultural traditions.", "世界各地的节日庆祝多元的文化传统。"]
+    ], medium: [
+      ["Cultural heritage preservation faces new challenges in the digital age.", "文化遗产保护在数字时代面临新的挑战。"],
+      ["The global popularity of K-pop demonstrates the power of cultural soft power.", "韩流在全球的流行展示了文化软实力的力量。"],
+      ["Museums are using digital technologies to make collections more accessible.", "博物馆正在利用数字技术让藏品更容易被公众接触。"]
+    ], hard: [
+      ["The tension between cultural homogenization and diversification raises questions about cultural sovereignty.", "文化同质化与多元化之间的张力引发了关于文化主权的思考。"],
+      ["Repatriation of cultural artifacts reflects broader debates about colonial legacies.", "文化文物的归还反映了关于殖民遗产的更广泛辩论。"],
+      ["AI and creative industries are challenging traditional notions of authorship.", "人工智能与创意产业正在挑战传统的作者身份概念。"]
+    ] }
+  }
+};
+
+// ========== 评估引擎 ==========
+const evalEngine = {
+  // 核心评估函数：基于参考译文对比
+  evaluate: function(userText, sourceText, langDir, refTranslation) {
+    const scores = { accuracy: 0, fluency: 0, language: 0, completeness: 0, total: 0 };
+    const details = [];
+
+    if (langDir === 'zh-en') {
+      // 中文→英文评估
+      const result = this.evaluateZhEn(userText, refTranslation, sourceText);
+      scores.accuracy = result.accuracy;
+      scores.fluency = result.fluency;
+      scores.language = result.language;
+      scores.completeness = result.completeness;
+      details.push(...result.details);
+    } else {
+      // 英文→中文评估
+      const result = this.evaluateEnZh(userText, refTranslation, sourceText);
+      scores.accuracy = result.accuracy;
+      scores.fluency = result.fluency;
+      scores.language = result.language;
+      scores.completeness = result.completeness;
+      details.push(...result.details);
+    }
+
+    scores.total = Math.round((scores.accuracy + scores.fluency + scores.language + scores.completeness) / 4);
+
+    // 生成反馈文本
+    const feedback = this.generateFeedback(scores, details);
+    return { scores, feedback, details };
+  },
+
+  // 中→英评估
+  evaluateZhEn: function(userText, ref, sourceText) {
+    const userWords = this.tokenizeEnglish(userText.toLowerCase());
+    const refWords = this.tokenizeEnglish(ref.toLowerCase());
+    const sourceChars = sourceText.replace(/[\s，。、；：！？""''（）【】]/g, '');
+
+    // 1. 信息准确度：基于关键内容词重叠
+    const contentWords = refWords.filter(w => w.length > 2 && !this.isStopWord(w));
+    const userContentWords = userWords.filter(w => w.length > 2 && !this.isStopWord(w));
+    const matchedContent = contentWords.filter(w => userContentWords.includes(w));
+    const accRatio = contentWords.length > 0 ? matchedContent.length / contentWords.length : 0;
+
+    // 2. 流畅度：基于句子长度比例和连接词使用
+    const lenRatio = userWords.length / Math.max(refWords.length, 1);
+    const fluencyScore = this.calcFluency(lenRatio, userWords);
+
+    // 3. 语言质量：基于词法多样性
+    const uniqueRatio = new Set(userWords).size / Math.max(userWords.length, 1);
+    const langScore = Math.min(98, Math.round(55 + uniqueRatio * 45));
+
+    // 4. 完整性：基于译文/原文长度比
+    const completenessRatio = Math.min(userWords.length / Math.max(sourceChars.length / 2, 1) * 1.2, 1.2);
+    const completenessScore = this.calcCompleteness(completenessRatio);
+
+    const accuracy = Math.min(98, Math.round(50 + accRatio * 50));
+    const fluency = Math.min(98, fluencyScore);
+
+    const details = [];
+    if (accRatio < 0.5) details.push('关键术语或核心信息有遗漏，建议对照参考译文检查');
+    else if (accRatio < 0.75) details.push('主要信息已传达，部分术语可以更精确');
+    else details.push('关键信息覆盖较好');
+
+    if (fluency < 70) details.push('表达可以更流畅，注意句式结构的自然转换');
+    else if (fluency >= 85) details.push('表达流畅自然，语序处理得当');
+
+    if (completenessRatio < 0.5) details.push('译文长度明显不足，可能有较多信息遗漏');
+    else if (completenessRatio > 1.3) details.push('译文偏长，可以更简洁');
+
+    return { accuracy, fluency, language: langScore, completeness: completenessScore, details };
+  },
+
+  // 英→中评估
+  evaluateEnZh: function(userText, ref, sourceText) {
+    const userChars = userText.replace(/[\s，。、；：！？""''（）【】]/g, '');
+    const refChars = ref.replace(/[\s，。、；：！？""''（）【】]/g, '');
+    const sourceWords = sourceText.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+    // 1. 信息准确度：基于中文关键词
+    const refTokens = this.tokenizeChinese(ref);
+    const userTokens = this.tokenizeChinese(userText);
+    const matched = refTokens.filter(t => userTokens.includes(t));
+    const accRatio = refTokens.length > 0 ? matched.length / refTokens.length : 0;
+
+    // 2. 流畅度
+    const lenRatio = userChars.length / Math.max(refChars.length, 1);
+    const fluencyScore = Math.min(98, Math.round(60 + (1 - Math.abs(1 - lenRatio)) * 35));
+
+    // 3. 语言质量
+    const uniqueRatio = new Set(userTokens).size / Math.max(userTokens.length, 1);
+    const langScore = Math.min(98, Math.round(50 + uniqueRatio * 45));
+
+    // 4. 完整性
+    const completenessRatio = Math.min(userChars.length / Math.max(refChars.length, 1) * 1.1, 1.2);
+    const completenessScore = Math.min(98, Math.round(55 + completenessRatio * 40));
+
+    const accuracy = Math.min(98, Math.round(45 + accRatio * 55));
+    const fluency = Math.min(98, fluencyScore);
+    const completeness = Math.min(98, completenessScore);
+
+    const details = [];
+    if (accRatio < 0.5) details.push('关键信息有遗漏，建议对照原文检查术语和核心信息');
+    else if (accRatio < 0.75) details.push('主要信息已传达，个别表达可更精确');
+    else details.push('信息传达准确');
+
+    if (lenRatio < 0.6) details.push('译文偏短，可能有信息遗漏');
+    else if (lenRatio > 1.3) details.push('译文偏长，可以更简洁');
+
+    return { accuracy, fluency, language: langScore, completeness, details };
+  },
+
+  tokenizeEnglish: function(text) {
+    return text.split(/[\s,.;:!?'"()-]+/).filter(w => w.length > 0);
+  },
+
+  tokenizeChinese: function(text) {
+    const tokens = [];
+    // 简单分词：提取2字词和单个实词
+    for (let i = 0; i < text.length - 1; i++) {
+      const bigram = text.substring(i, i + 2);
+      if (/[\u4e00-\u9fff]/.test(bigram)) tokens.push(bigram);
+    }
+    // 也加入单个汉字
+    for (const ch of text) {
+      if (/[\u4e00-\u9fff]/.test(ch)) tokens.push(ch);
+    }
+    return tokens;
+  },
+
+  isStopWord: function(w) {
+    return ['the','is','are','was','were','been','have','has','had','do','does','did',
+      'will','would','can','could','shall','should','may','might','must','this','that',
+      'these','those','a','an','and','or','but','in','on','at','to','for','of','with',
+      'by','from','as','it','its','they','them','their','we','us','our','you','your',
+      'he','him','his','she','her','not','no'].includes(w);
+  },
+
+  calcFluency: function(lenRatio, words) {
+    let score = 75;
+    const penalty = Math.abs(1 - lenRatio) * 25;
+    score -= penalty;
+    // 检查连接词使用
+    const connectors = ['and','but','however','therefore','moreover','furthermore','while','although','because','so'];
+    const hasConnectors = connectors.some(c => words.includes(c));
+    if (hasConnectors) score += 5;
+    return Math.min(98, Math.max(40, Math.round(score)));
+  },
+
+  calcCompleteness: function(ratio) {
+    if (ratio >= 0.8 && ratio <= 1.2) return Math.round(75 + (1 - Math.abs(1 - ratio)) * 25);
+    if (ratio > 0.5 && ratio < 0.8) return Math.round(55 + (ratio - 0.5) * 60);
+    return Math.round(40 + ratio * 20);
+  },
+
+  generateFeedback: function(scores, details) {
+    const total = scores.total;
+    let fb = '';
+
+    if (total >= 85) fb = '🎉 整体表现优秀！';
+    else if (total >= 70) fb = '👍 表现良好，有提升空间。';
+    else if (total >= 55) fb = '💪 基础尚可，需要加强训练。';
+    else fb = '📚 建议从入门难度重新开始，打好基础。';
+
+    if (details.length > 0) {
+      fb += ' ' + details.join('；') + '。';
+    }
+
+    const improvements = [];
+    if (scores.accuracy < 70) improvements.push('建议对照参考译文，重点检查核心信息的传达');
+    if (scores.fluency < 70) improvements.push('多做顺句驱动练习，提升表达流畅度');
+    if (scores.completeness < 70) improvements.push('加强听辨和笔记训练，确保信息完整');
+    if (scores.language < 70) improvements.push('注意词汇积累和语法规范');
+    if (improvements.length > 0) {
+      fb += ' 改进建议：' + improvements.join('；') + '。';
+    } else {
+      fb += ' 继续保持训练节奏！';
+    }
+
+    return fb;
   }
 };
 
 // ========== 状态 ==========
 let state = {
-  usingMock: true,
+  usingBuiltin: true,
   currentText: '',
+  refTranslation: '',
   textsInTopic: [],
   currentIdx: 0,
   round: 0,
@@ -193,25 +480,26 @@ function pickTexts() {
 function toggleApi() {
   const k = document.getElementById('apiKey');
   k.style.display = k.style.display === 'none' ? 'inline-block' : 'none';
-  if (k.style.display === 'none') { k.value = ''; state.usingMock = true; }
+  if (k.style.display === 'none') {
+    k.value = '';
+    state.usingBuiltin = true;
+    document.getElementById('evalMode').textContent = '评估模式：内置引擎';
+  } else {
+    document.getElementById('evalMode').textContent = '评估模式：外部 API';
+  }
 }
 
 function scrollToBottom() {
   setTimeout(() => { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }, 50);
 }
 
-function escapeHtml(t) {
-  const d = document.createElement('div');
-  d.textContent = t; return d.innerHTML;
-}
-
+function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 function disableInput(disabled) {
   document.getElementById('userInput').disabled = disabled;
   document.getElementById('sendBtn').disabled = disabled;
   state.waitingForResponse = disabled;
 }
 
-// ========== 消息渲染 ==========
 function addCoachMsg(html) {
   const div = document.createElement('div');
   div.className = 'msg msg-coach';
@@ -248,23 +536,17 @@ function addSystemMsg(text) {
 // ========== TTS ==========
 function speakText(text, callback) {
   if (!window.speechSynthesis) { toast('浏览器不支持语音合成'); if (callback) callback(); return; }
-
   state.isPlaying = true;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.85;
   utterance.pitch = 1;
-
   const dir = document.getElementById('langDir').value;
-  if (dir === 'zh-en') { utterance.lang = 'zh-CN'; } else { utterance.lang = 'en-US'; }
-
-  // Try to find a good voice
+  utterance.lang = dir === 'zh-en' ? 'zh-CN' : 'en-US';
   const voices = speechSynthesis.getVoices();
-  const preferred = dir === 'zh-CN' ? voices.find(v => v.lang.startsWith('zh')) : voices.find(v => v.lang.startsWith('en'));
+  const preferred = voices.find(v => v.lang.startsWith(dir === 'zh-en' ? 'zh' : 'en'));
   if (preferred) utterance.voice = preferred;
-
   utterance.onend = function() { state.isPlaying = false; if (callback) callback(); };
   utterance.onerror = function() { state.isPlaying = false; if (callback) callback(); };
-
   speechSynthesis.speak(utterance);
 }
 
@@ -272,14 +554,10 @@ function speakText(text, callback) {
 function initRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) return false;
-
   state.recognition = new SpeechRecognition();
   state.recognition.continuous = true;
   state.recognition.interimResults = true;
-
-  const dir = document.getElementById('langDir').value;
   state.recognition.lang = 'zh-CN';
-
   state.recognition.onresult = function(event) {
     let interim = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -291,42 +569,22 @@ function initRecognition() {
     input.value = state.transcriptBuffer + interim;
     autoResize(input);
   };
-
-  state.recognition.onerror = function(event) {
-    console.warn('Speech recognition error:', event.error);
-    if (event.error === 'no-speech') { /* ignore */ }
-  };
-
+  state.recognition.onerror = function() {};
   return true;
 }
 
 function toggleRecording() {
-  if (state.isRecording) {
-    stopRecording();
-  } else {
-    startRecording();
-  }
+  if (state.isRecording) { stopRecording(); }
+  else { startRecording(); }
 }
 
 function startRecording() {
-  if (!initRecognition()) {
-    toast('语音识别不可用，请使用 Chrome 浏览器或手动输入');
-    return;
-  }
-
+  if (!initRecognition()) { toast('语音识别不可用，请用 Chrome 或手动输入'); return; }
   if (state.isPlaying) { toast('请等语音播报完再口译'); return; }
-
   state.transcriptBuffer = '';
-  const input = document.getElementById('userInput');
-  input.value = '';
-  input.placeholder = '正在录音口译...';
-
-  try {
-    state.recognition.start();
-  } catch (e) {
-    // might already be started
-  }
-
+  document.getElementById('userInput').value = '';
+  document.getElementById('userInput').placeholder = '正在录音口译...';
+  try { state.recognition.start(); } catch(e) {}
   state.isRecording = true;
   const btn = document.getElementById('micBtn');
   btn.textContent = '⏹ 停止录音';
@@ -334,24 +592,17 @@ function startRecording() {
 }
 
 function stopRecording() {
-  if (state.recognition) {
-    try { state.recognition.stop(); } catch(e) {}
-  }
-
+  if (state.recognition) { try { state.recognition.stop(); } catch(e) {} }
   state.isRecording = false;
   const btn = document.getElementById('micBtn');
   btn.textContent = '🎤 开始口译';
   btn.classList.remove('recording');
-
-  const input = document.getElementById('userInput');
-  input.placeholder = '或手动输入译文...';
-
+  document.getElementById('userInput').placeholder = '或手动输入译文...';
   if (state.transcriptBuffer.trim()) {
-    // Auto-submit after a short delay
     const text = state.transcriptBuffer.trim();
     state.transcriptBuffer = '';
-    input.value = text;
-    autoResize(input);
+    document.getElementById('userInput').value = text;
+    autoResize(document.getElementById('userInput'));
     setTimeout(() => sendMessage(), 300);
   }
 }
@@ -372,17 +623,20 @@ function startTraining() {
   const topicLabel = topicEl.options[topicEl.selectedIndex].text;
 
   addCoachMsg(`欢迎来到交替传译训练！<br><br>
-    <b>训练目标：</b>提升交替传译的听辨理解、短期记忆与口头表达能力<br>
+    <b>训练目标：</b>交替传译 — 听辨理解 → 短期记忆 → 信息重组 → 口头表达<br>
     <b>当前设置：</b>${langLabel} · ${topicLabel} · ${diffLabel}<br><br>
-    <b>训练流程：</b><br>
-    1️⃣ 智能体用语音播报一段源语（可戴耳机收听）<br>
-    2️⃣ 听完后点击「🎤 开始口译」用麦克风口译<br>
-    3️⃣ 语音识别会自动转写你的译文<br>
-    4️⃣ AI 评估你的口译质量并给出反馈<br><br>
-    <span style="color:#888">准备好就开始吧！点击下方按钮或发送消息开始第一题。</span>`);
+    <b>流程：</b><br>
+    1️⃣ 智能体用语音播报源语（听）<br>
+    2️⃣ 听完后点击「🎤 开始口译」用麦克风口译（说）<br>
+    3️⃣ 内置 AI 引擎评估你的口译质量并给出反馈<br><br>
+    <span style="color:#888">✅ 内置评估引擎已启用，无需 API Key，完全免费</span><br><br>
+    发送任意消息开始！`);
 
   state.textsInTopic = pickTexts();
-  state.currentText = state.textsInTopic[0] || '';
+  if (state.textsInTopic.length > 0) {
+    state.currentText = state.textsInTopic[0][0];
+    state.refTranslation = state.textsInTopic[0][1];
+  }
   state.waitingForFirst = true;
   document.getElementById('userInput').value = '';
   disableInput(false);
@@ -392,7 +646,9 @@ function presentNextText() {
   if (state.textsInTopic.length === 0) state.textsInTopic = pickTexts();
   state.currentIdx++;
   if (state.currentIdx >= state.textsInTopic.length) { state.textsInTopic = pickTexts(); state.currentIdx = 0; }
-  state.currentText = state.textsInTopic[state.currentIdx];
+  const pair = state.textsInTopic[state.currentIdx];
+  state.currentText = pair[0];
+  state.refTranslation = pair[1];
   state.round++;
 
   const dir = document.getElementById('langDir').value;
@@ -403,12 +659,11 @@ function presentNextText() {
     <span style="font-size:15px">${escapeHtml(state.currentText)}</span><br>
     <span style="color:#888;font-size:12px">🔊 语音正在播报...</span>`);
 
-  // Speak the text, then enable input
   disableInput(true);
   document.getElementById('micBtn').disabled = true;
 
   speakText(state.currentText, function() {
-    addCoachMsg(`<span style="color:#0d47a1">✅ 播报完毕！请点击「🎤 开始口译」进行口译，或在下方输入框中手动输入你的译文。</span>`);
+    addCoachMsg(`<span style="color:#0d47a1">✅ 播报完毕！请点击「🎤 开始口译」或手动输入译文。</span>`);
     disableInput(false);
     document.getElementById('micBtn').disabled = false;
     document.getElementById('userInput').focus();
@@ -418,7 +673,6 @@ function presentNextText() {
 // ========== 发送消息 ==========
 async function sendMessage() {
   if (state.waitingForResponse) return;
-
   const input = document.getElementById('userInput');
   const text = input.value.trim();
   if (!text) { toast('请输入或口译你的译文'); return; }
@@ -436,108 +690,24 @@ async function sendMessage() {
   disableInput(true);
   document.getElementById('micBtn').disabled = true;
 
-  const key = document.getElementById('apiKey').value.trim();
-  state.usingMock = !key;
-
-  if (state.usingMock) {
-    setTimeout(() => doMockEval(text), 600);
-  } else {
-    await doAIEval(text);
-  }
+  // 使用内置评估引擎（基于参考译文对比，真实分析用户译文）
+  setTimeout(() => doBuiltinEval(text), 300);
 }
 
-// ========== 模拟评估 ==========
-function doMockEval(userText) {
-  const scores = genMockScores(userText, state.currentText);
-  showFeedback(scores, userText, '');
-}
-
-function genMockScores(userText, source) {
-  const acc = Math.floor(62 + Math.random() * 30);
-  const flu = Math.floor(60 + Math.random() * 30);
-  const lang = Math.floor(60 + Math.random() * 28);
-  const comp = Math.floor(62 + Math.random() * 28);
-  const total = Math.round((acc + flu + lang + comp) / 4);
-
-  let fb = '';
-  if (acc >= 88) fb += '✅ 信息准确度高，关键信息完整传达。';
-  else if (acc >= 72) fb += '⚠️ 主要信息已传达，部分细节可进一步精确。';
-  else fb += '❌ 信息有遗漏或偏差，建议对照原文检查。';
-
-  if (flu >= 85) fb += ' 表达流畅自然，符合目标语习惯。';
-  else if (flu >= 70) fb += ' 整体流畅，部分表达可更简洁。';
-  else fb += ' 流畅度需提高，注意减少口头禅和停顿。';
-
-  if (comp >= 85) fb += ' 信息完整，没有明显遗漏。';
-  else if (comp >= 70) fb += ' 主要信息已覆盖，个别细节可补充。';
-  else fb += ' 信息完整性不足，建议加强听辨和笔记训练。';
-
-  const modelHint = source.length > 30
-    ? '（参考反馈中的建议优化表达）'
-    : '（可对照原文思考更优译法）';
-
-  return { accuracy: acc, fluency: flu, language: lang, completeness: comp, total, feedback: fb, modelTranslation: modelHint };
-}
-
-// ========== AI 评估 ==========
-async function doAIEval(userText) {
-  const apiKey = document.getElementById('apiKey').value.trim();
-  const apiUrl = 'https://api.openai.com/v1';
+// ========== 内置评估（基于参考译文对比） ==========
+function doBuiltinEval(userText) {
   const dir = document.getElementById('langDir').value;
-  const langPair = dir === 'zh-en' ? '中文→英文' : '英文→中文';
-
-  const prompt = `你是一位专业的口译评估导师。请评估一段交替传译练习。
-
-讲话人原文：${state.currentText}
-译员口译：${userText}
-语言方向：${langPair}
-
-请从口译评估的专业角度评分（0-100）：
-1. 信息准确度：译文是否准确传达原文信息
-2. 表达流畅度：口头表达是否自然流畅
-3. 语言质量：用词语法是否规范
-4. 信息完整性：有无重要遗漏
-
-同时给出一个参考译文和改进建议。
-
-以 JSON 格式输出：
-{"accuracy":数字,"fluency":数字,"language":数字,"completeness":数字,"total":平均分,"feedback":"详细中文反馈和改进口译建议","modelTranslation":"参考译文"}`;
-
-  try {
-    const resp = await fetch(apiUrl + '/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: '你是一名专业的口译评估导师。严格按JSON格式输出中文反馈。' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
-        max_tokens: 1500
-      })
-    });
-
-    if (!resp.ok) throw new Error(`API 请求失败 (${resp.status})`);
-
-    const data = await resp.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    const result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-    if (!result || typeof result.accuracy !== 'number') throw new Error('格式错误');
-
-    showFeedback(result, userText, result.modelTranslation || '');
-  } catch (err) {
-    toast('AI 评估失败，使用内置评估');
-    doMockEval(userText);
-  }
+  const result = evalEngine.evaluate(userText, state.currentText, dir, state.refTranslation);
+  showFeedback(result.scores, userText, state.refTranslation, result.feedback, result.details);
 }
 
-// ========== 展示评估结果 ==========
-function showFeedback(scores, userText, modelTrans) {
-  const total = scores.total || Math.round((scores.accuracy + scores.fluency + scores.language + scores.completeness) / 4);
-
+function showFeedback(scores, userText, refTranslation, feedback, details) {
   const cls = (s) => s >= 85 ? 'good' : s >= 70 ? 'mid' : 'bad';
+
+  let detailsHtml = '';
+  if (details && details.length > 0) {
+    detailsHtml = '<div class="detail-box">' + details.map(d => '• ' + escapeHtml(d)).join('<br>') + '</div>';
+  }
 
   let html = `
     <div class="score-row">
@@ -545,18 +715,15 @@ function showFeedback(scores, userText, modelTrans) {
       <span class="score-item">表达流畅度：<strong class="${cls(scores.fluency)}">${scores.fluency}</strong></span>
       <span class="score-item">语言质量：<strong class="${cls(scores.language)}">${scores.language}</strong></span>
       <span class="score-item">信息完整性：<strong class="${cls(scores.completeness)}">${scores.completeness}</strong></span>
-      <span class="score-item">综合：<strong>${total}</strong></span>
+      <span class="score-item">综合：<strong>${scores.total}</strong></span>
     </div>
-    <div style="margin:8px 0">${escapeHtml(scores.feedback || '')}</div>`;
-
-  if (modelTrans) {
-    html += `<div class="model-trans"><strong>📝 参考译文：</strong>${escapeHtml(modelTrans)}</div>`;
-  }
-
-  html += `<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-    <button class="action-btn" onclick="presentNextText()">下一题 →</button>
-    <button class="action-btn secondary" onclick="showSummary()">本次训练总结</button>
-  </div>`;
+    <div style="margin:8px 0">${escapeHtml(feedback)}</div>
+    ${detailsHtml}
+    <div class="model-trans"><strong>📝 参考译文：</strong>${escapeHtml(refTranslation)}</div>
+    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="action-btn" onclick="presentNextText()">下一题 →</button>
+      <button class="action-btn secondary" onclick="showSummary()">训练总结</button>
+    </div>`;
 
   addFeedbackMsg(html);
 
@@ -568,8 +735,8 @@ function showFeedback(scores, userText, modelTrans) {
     topic: document.getElementById('topic').value,
     sourceText: state.currentText,
     userTranslation: userText,
-    scores: { accuracy: scores.accuracy, fluency: scores.fluency, language: scores.language, completeness: scores.completeness, total },
-    modelTranslation: modelTrans || ''
+    scores: { accuracy: scores.accuracy, fluency: scores.fluency, language: scores.language, completeness: scores.completeness, total: scores.total },
+    modelTranslation: refTranslation
   });
   localStorage.setItem('ciHistory', JSON.stringify(state.history));
 
@@ -581,26 +748,18 @@ function showSummary() {
   const last5 = state.history.slice(-5);
   if (last5.length === 0) { toast('暂无数据'); return; }
   const avg = Math.round(last5.reduce((a, r) => a + r.scores.total, 0) / last5.length);
-
-  let comment = avg >= 85 ? '🎉 表现优秀！交替传译能力扎实。' : avg >= 70 ? '👍 表现良好，坚持训练会有更大提升。' : '💪 继续加油，建议从入门难度开始，打好听辨基础。';
-
-  addCoachMsg(`<b>训练小结</b><br><br>
-    已完成 <b>${state.totalRounds}</b> 题<br>
-    近5题平均分：<b>${avg}</b><br><br>
-    ${comment}<br><br>
-    <span style="color:#888">可以继续训练，或点击「重新开始」切换主题/难度。</span>`);
+  let comment = avg >= 85 ? '🎉 表现优秀！交替传译能力扎实。' : avg >= 70 ? '👍 表现良好，坚持训练！' : '💪 加油！建议从入门难度开始。';
+  addCoachMsg(`<b>训练小结</b><br><br>已完成 <b>${state.totalRounds}</b> 题<br>近5题平均分：<b>${avg}</b><br><br>${comment}`);
 }
 
 function resetChat() {
-  if (state.totalRounds > 0 && !confirm('确定重新开始？训练记录会保留。')) return;
+  if (state.totalRounds > 0 && !confirm('确定重新开始？')) return;
   state.waitingForFirst = true;
   startTraining();
 }
 
-// ========== 初始化语音支持 + 启动 ==========
-if (window.speechSynthesis) {
-  speechSynthesis.getVoices(); // trigger voice loading
-}
+// ========== 启动 ==========
+if (window.speechSynthesis) speechSynthesis.getVoices();
 startTraining();
 </script>
 </body>
