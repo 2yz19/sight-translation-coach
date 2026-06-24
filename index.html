@@ -294,7 +294,7 @@ const evalEngine = {
     }
 
     scores.total = Math.round((scores.accuracy + scores.fluency + scores.language + scores.completeness) / 4);
-    const feedback = this.generateFeedback(scores, details);
+    const feedback = this.generateFeedback(scores, refTranslation || state.refTranslation, userText || '');
     return { scores, feedback, details };
   },
 
@@ -392,24 +392,63 @@ const evalEngine = {
       'he','him','his','she','her','not','no'].includes(w);
   },
 
-  generateFeedback: function(scores, details) {
+  generateFeedback: function(scores, refTranslation, userText) {
     const t = scores.total;
-    let fb = '';
-    if (t >= 85) fb = '🎉 整体表现优秀！口译质量高。';
-    else if (t >= 70) fb = '👍 表现良好，部分维度还有提升空间。';
-    else if (t >= 50) fb = '💪 基础尚可，需要加强薄弱环节。';
-    else if (t >= 30) fb = '📚 需要大幅加强，建议从入门难度开始重新训练。';
-    else fb = '❌ 译文与源语有较大差距，建议重新听取源语，抓住核心信息再尝试。';
-    if (details.length > 0) fb += ' ' + details.join('；') + '。';
-    if (t >= 50) {
-      const im = [];
-      if (scores.accuracy < 60) im.push('重点提高信息准确度，听取核心词汇');
-      if (scores.fluency < 60) im.push('提升表达流畅度，注意句式自然转换');
-      if (scores.completeness < 60) im.push('加强信息完整性，做好笔记辅助记忆');
-      if (scores.language < 60) im.push('注意语言质量和词汇积累');
-      if (im.length > 0) fb += ' 改进建议：' + im.join('；') + '。';
-      else fb += ' 继续保持训练节奏！';
+    const ref = refTranslation || '';
+    const user = userText || '';
+
+    // 逐维度评级
+    const level = (s) => s >= 85 ? '优秀' : s >= 70 ? '良好' : s >= 50 ? '一般' : s >= 30 ? '较差' : '很差';
+
+    // 中英分别构建报告
+    const dir = document.getElementById('langDir').value;
+
+    let fb = `【综合评级：${level(t)}（${t}分）】\n\n`;
+
+    fb += `📊 各维度表现：\n`;
+    fb += `  • 信息准确度：${scores.accuracy}分（${level(scores.accuracy)}）— 反映你对源语核心信息的捕捉能力\n`;
+    fb += `  • 表达流畅度：${scores.fluency}分（${level(scores.fluency)}）— 反映译文语序和句式自然度\n`;
+    fb += `  • 语言质量：${scores.language}分（${level(scores.language)}）— 反映词汇选择和语法规范性\n`;
+    fb += `  • 信息完整性：${scores.completeness}分（${level(scores.completeness)}）— 反映是否有信息遗漏\n\n`;
+
+    // 维度对比
+    const dims = [
+      { key: 'accuracy', name: '准确度', high: '信息抓取能力强', low: '需要加强听辨，抓住核心词汇' },
+      { key: 'fluency', name: '流畅度', high: '句式处理自然，符合目标语习惯', low: '注意顺句驱动，减少生硬直译' },
+      { key: 'language', name: '语言质量', high: '词汇语法基础扎实', low: '注意词汇积累和语法规范' },
+      { key: 'completeness', name: '完整性', high: '信息覆盖全面', low: '做好笔记，确保不遗漏关键信息' }
+    ];
+
+    fb += `📋 核心分析：\n`;
+    dims.forEach(d => {
+      if (scores[d.key] >= 80) fb += `  ✅ ${d.name}：${d.high}\n`;
+      else if (scores[d.key] <= 45) fb += `  ❌ ${d.name}：${d.low}\n`;
+      else fb += `  ⚠️ ${d.name}：有提升空间，可针对性加强\n`;
+    });
+
+    // 最弱维度专项建议
+    const sorted = [...dims].sort((a, b) => scores[a.key] - scores[b.key]);
+    fb += `\n🎯 优先改进：${sorted[0].name}（${scores[sorted[0].key]}分）是最大短板`;
+    if (scores[sorted[0].key] < 60) {
+      fb += `，建议专项训练这个维度。`;
+    } else {
+      fb += `，继续巩固的同时提升其他维度。`;
     }
+
+    // 与参考译文对比
+    const uWords = user.replace(/[^\w\u4e00-\u9fff]/g, '').length;
+    const rWords = ref.replace(/[^\w\u4e00-\u9fff]/g, '').length;
+    const ratio = rWords > 0 ? Math.round(uWords / rWords * 100) : 0;
+
+    fb += `\n\n📐 量化对比：你的译文长度约为参考译文的 ${ratio}%`;
+    if (ratio < 40) fb += '（明显偏短，信息遗漏较多）';
+    else if (ratio < 70) fb += '（偏短，部分信息可能遗漏）';
+    else if (ratio < 130) fb += '（长度适中，信息量匹配）';
+    else fb += '（偏长，可以更精炼）';
+
+    // 语句级改进提示
+    fb += `\n\n💡 参考译文对比建议：逐句对照参考译文，重点关注你遗漏或译错的部分。交替传译的关键是"得意忘形"——抓住意思，不拘泥于原文字词。`;
+
     return fb;
   }
 };
@@ -688,7 +727,7 @@ function showFeedback(scores, userText, refTranslation, feedback, details) {
       <span class="score-item">信息完整性：<strong class="${cls(scores.completeness)}">${scores.completeness}</strong></span>
       <span class="score-item">综合：<strong>${scores.total}</strong></span>
     </div>
-    <div style="margin:8px 0">${escapeHtml(feedback)}</div>
+    <div style="margin:8px 0;white-space:pre-wrap;line-height:1.7">${escapeHtml(feedback)}</div>
     ${detailsHtml}
     <div class="model-trans"><strong>📝 参考译文：</strong>${escapeHtml(refTranslation)}</div>
     <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
