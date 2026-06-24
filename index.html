@@ -603,37 +603,16 @@ function addSystemMsg(text) {
   scrollToBottom();
 }
 
-// ========== TTS（修复英→中时读英文）==========
-let ttsVoicesLoaded = false;
-if (window.speechSynthesis) {
-  speechSynthesis.getVoices(); // trigger loading
-  speechSynthesis.onvoiceschanged = function() { ttsVoicesLoaded = true; };
-  setTimeout(function() { ttsVoicesLoaded = true; }, 2000); // fallback
-}
-
-function getTTSVoice(dir) {
-  const voices = speechSynthesis.getVoices();
-  if (!voices || voices.length === 0) return null;
-  const wantZh = dir === 'zh-en';
-  // 优先找 Microsoft 或 Google 的对应语言声音
-  let v = voices.find(v => v.lang.startsWith(wantZh ? 'zh' : 'en') && (v.name.includes('Microsoft') || v.name.includes('Google') || v.name.includes('Natural')));
-  if (!v) v = voices.find(v => v.lang.startsWith(wantZh ? 'zh' : 'en'));
-  return v || null;
-}
-
+// ========== TTS ==========
 function speakText(text, callback) {
   if (!window.speechSynthesis) { toast('浏览器不支持语音合成'); if (callback) callback(); return; }
-  // cancel any ongoing speech
   window.speechSynthesis.cancel();
   state.isPlaying = true;
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.85;
-  utterance.pitch = 1;
   const dir = document.getElementById('langDir').value;
-  const wantEn = dir === 'en-zh'; // 英→中：源语是英文
-  utterance.lang = wantEn ? 'en-US' : 'zh-CN';
-  const voice = getTTSVoice(dir);
-  if (voice) utterance.voice = voice;
+  // 英→中读英文，中→英读中文
+  utterance.lang = dir === 'en-zh' ? 'en-US' : 'zh-CN';
   utterance.onend = function() { state.isPlaying = false; if (callback) callback(); };
   utterance.onerror = function() { state.isPlaying = false; if (callback) callback(); };
   speechSynthesis.speak(utterance);
