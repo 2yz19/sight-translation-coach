@@ -522,6 +522,7 @@ let state = {
   currentIdx: 0,
   round: 0,
   totalRounds: 0,
+  lastLangDir: '',
   history: JSON.parse(localStorage.getItem('ciHistory') || '[]'),
   waitingForResponse: false,
   waitingForFirst: true,
@@ -603,8 +604,43 @@ function addSystemMsg(text) {
   scrollToBottom();
 }
 
-// ========== TTS（已禁用，改用显示文字）==========
-function speakText(text, callback) { if (callback) callback(); }
+// ========== TTS ==========
+let ttsReady = false;
+let ttsEnglishOk = false;
+let ttsChineseOk = false;
+function initTTS() {
+  if (!window.speechSynthesis) return false;
+  checkVoices();
+  window.speechSynthesis.onvoiceschanged = checkVoices;
+  window.speechSynthesis.getVoices();
+  return true;
+}
+function checkVoices() {
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return;
+  ttsReady = true;
+  console.log('Available TTS voices:', voices.map(v => v.name + ' [' + v.lang + ']'));
+  ttsEnglishOk = voices.some(v => v.lang && v.lang.startsWith('en'));
+  ttsChineseOk = voices.some(v => v.lang && v.lang.startsWith('zh'));
+}
+function speakText(text, callback) {
+  if (!window.speechSynthesis) { if (callback) callback(); return; }
+  window.speechSynthesis.cancel();
+  const isChinese = /[\u4e00-\u9fff]/.test(text);
+  console.log('speakText:', text.substring(0, 50), '| lang:', isChinese ? 'zh-CN' : 'en-US', '| dir:', document.getElementById('langDir').value);
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = isChinese ? 'zh-CN' : 'en-US';
+  utterance.rate = 0.8;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+  state.isPlaying = true;
+  let ended = false;
+  utterance.onend = function() { if (!ended) { ended = true; state.isPlaying = false; if (callback) callback(); } };
+  utterance.onerror = function() { if (!ended) { ended = true; state.isPlaying = false; if (callback) callback(); } };
+  window.speechSynthesis.speak(utterance);
+  // Safety net: if onend/onerror never fires, release after 30s
+  setTimeout(function() { if (!ended) { ended = true; state.isPlaying = false; if (callback) callback(); } }, 30000);
+}
 
 // ========== 语音识别 ==========
 function initRecognition() {
@@ -682,14 +718,16 @@ function startTraining() {
     <b>训练目标：</b>交替传译 — 听辨理解 → 短期记忆 → 信息重组 → 口头表达<br>
     <b>当前设置：</b>${langLabel} · ${topicLabel} · ${diffLabel}<br><br>
     <b>流程：</b><br>
-    1️⃣ 点击「查看源语」阅读源语文本（看）<br>
-    2️⃣ 点击「已记住，开始口译」隐藏源语<br>
-    3️⃣ 点击「🎤 开始口译」用麦克风口译（说）<br>
-    4️⃣ 内置 AI 引擎评估你的口译质量并给出反馈<br><br>
+    1️⃣ 点击「🔊 播放源语」听取源语播报（听）<br>
+    2️⃣ 凭短期记忆进行口译（说）<br>
+    3️⃣ 点击「🎤 开始口译」用麦克风录音，或手动输入<br>
+    4️⃣ 内置 AI 引擎评估你的口译质量并给出反馈（含原文）<br><br>
     <span style="color:#888">✅ 内置评估引擎已启用，无需 API Key，完全免费</span><br><br>
     发送任意消息开始！`);
 
+  const initialDir = document.getElementById('langDir').value;
   state.textsInTopic = pickTexts();
+  state.lastLangDir = initialDir;
   if (state.textsInTopic.length > 0) {
     state.currentText = state.textsInTopic[0][0];
     state.refTranslation = state.textsInTopic[0][1];
@@ -700,7 +738,11 @@ function startTraining() {
 }
 
 function presentNextText() {
-  if (state.textsInTopic.length === 0) state.textsInTopic = pickTexts();
+  const dir = document.getElementById('langDir').value;
+  if (state.textsInTopic.length === 0 || state.lastLangDir !== dir) {
+    state.textsInTopic = pickTexts();
+    state.lastLangDir = dir;
+  }
   state.currentIdx++;
   if (state.currentIdx >= state.textsInTopic.length) { state.textsInTopic = pickTexts(); state.currentIdx = 0; }
   const pair = state.textsInTopic[state.currentIdx];
@@ -708,38 +750,34 @@ function presentNextText() {
   state.refTranslation = pair[1];
   state.round++;
 
-  const dir = document.getElementById('langDir').value;
   const langLabel = dir === 'zh-en' ? '【中→英】' : '【英→中】';
-  const sourceLang = dir === 'zh-en' ? '中文' : '英文';
 
   addCoachMsg(`<span class="tag">第 ${state.round} 题 ${langLabel}</span>
-    <b>点击下方按钮查看${sourceLang}源语：</b><br>
-    <span style="color:#888;font-size:12px">看完后点击「隐藏并开始口译」，凭记忆进行口译</span>
-    <div style="margin-top:10px">
-      <button class="action-btn show-btn" onclick="showSource(this)" style="font-size:14px;padding:8px 20px">👁 查看源语</button>
+    <b>点击播放听取源语（凭记忆口译，不显示原文）：</b>
+    <div style="margin-top:8px">
+      <button class="action-btn" onclick="playSource(this)" style="font-size:16px;padding:10px 30px">🔊 播放源语</button>
     </div>
-    <div id="sourceReveal" style="display:none;margin-top:10px;padding:12px;background:#f0f4ff;border-radius:8px;border-left:4px solid #0d47a1;font-size:15px">${escapeHtml(state.currentText)}</div>
-    <div id="doneReveal" style="display:none;margin-top:8px">
-      <button class="action-btn" onclick="doneReading()" style="font-size:14px;padding:8px 20px">✅ 已记住，开始口译</button>
-    </div>`);
+    <div id="sourceHidden" style="display:none;margin-top:8px;color:#888;font-size:13px">⏳ 正在播报源语（<span id="sourceLangHint">英文</span>），请仔细听...</div>
+    <div id="ttsDone" style="display:none;margin-top:8px;color:#0d47a1;font-weight:600">✅ 播报完毕！请凭记忆口译为目标语</div>`);
 
   disableInput(true);
   document.getElementById('micBtn').disabled = true;
 }
 
-function showSource(btn) {
-  document.getElementById('sourceReveal').style.display = 'block';
-  document.getElementById('doneReveal').style.display = 'block';
-  if (btn) { btn.textContent = '📖 源语已显示'; btn.disabled = true; btn.style.opacity = '0.6'; }
-}
-
-function doneReading() {
-  document.getElementById('sourceReveal').style.display = 'none';
-  document.getElementById('doneReveal').style.display = 'none';
-  addCoachMsg(`<span style="color:#0d47a1">✅ 源语已隐藏！现在凭记忆进行口译。点击「🎤 开始口译」或手动输入译文。</span>`);
-  disableInput(false);
-  document.getElementById('micBtn').disabled = false;
-  document.getElementById('userInput').focus();
+function playSource(btn) {
+  btn.style.display = 'none';
+  const detected = /[\u4e00-\u9fff]/.test(state.currentText) ? '中文' : '英文';
+  const preview = state.currentText.substring(0, 30);
+  document.getElementById('sourceLangHint').innerHTML = detected + ' <span style="font-size:11px;color:#999">(' + escapeHtml(preview) + '...)</span>';
+  document.getElementById('sourceHidden').style.display = 'block';
+  document.getElementById('ttsDone').style.display = 'none';
+  speakText(state.currentText, function() {
+    document.getElementById('sourceHidden').style.display = 'none';
+    document.getElementById('ttsDone').style.display = 'block';
+    disableInput(false);
+    document.getElementById('micBtn').disabled = false;
+    document.getElementById('userInput').focus();
+  });
 }
 
 // ========== 发送消息 ==========
@@ -832,6 +870,7 @@ function resetChat() {
 }
 
 // ========== 启动 ==========
+initTTS();
 startTraining();
 </script>
 </body>
