@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>视译训练智能体</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+
+header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: #fff; padding: 16px 24px; text-align: center; flex-shrink: 0; }
+header h1 { font-size: 22px; }
+header p { font-size: 13px; opacity: .85; margin-top: 2px; }
+
+.container { flex: 1; max-width: 860px; margin: 0 auto; padding: 16px; width: 100%; display: flex; flex-direction: column; }
+
+/* Settings bar */
+#settingsBar { background: #fff; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 13px; flex-shrink: 0; }
+#settingsBar select, #settingsBar input { padding: 6px 10px; border: 1px solid #d0d5dd; border-radius: 6px; font-size: 13px; outline: none; }
+#settingsBar select:focus, #settingsBar input:focus { border-color: #1a73e8; }
+#settingsBar .label { color: #666; font-weight: 600; }
+
+/* Chat area */
+#chatArea { flex: 1; background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; overflow: hidden; min-height: 400px; }
+#messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.msg { max-width: 85%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; animation: fadeIn .3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.msg-coach { align-self: flex-start; background: #f0f4ff; border-bottom-left-radius: 4px; }
+.msg-coach .name { font-size: 12px; font-weight: 700; color: #1a73e8; margin-bottom: 4px; }
+.msg-coach .source-tag { display: inline-block; font-size: 11px; background: #e8f0fe; color: #1a73e8; padding: 1px 8px; border-radius: 4px; margin-bottom: 6px; }
+
+.msg-user { align-self: flex-end; background: #1a73e8; color: #fff; border-bottom-right-radius: 4px; }
+.msg-user .name { font-size: 12px; font-weight: 700; opacity: .8; margin-bottom: 2px; }
+.msg-user .edit-hint { font-size: 11px; opacity: .6; margin-top: 4px; cursor: pointer; }
+.msg-user .edit-hint:hover { opacity: 1; }
+
+.msg-system { align-self: center; background: #fff3e0; color: #e65100; font-size: 13px; border-radius: 8px; padding: 8px 16px; max-width: 90%; text-align: center; }
+
+.msg-feedback { align-self: flex-start; background: #f1f8e9; border-bottom-left-radius: 4px; border-left: 3px solid #689f38; }
+.msg-feedback .name { font-size: 12px; font-weight: 700; color: #558b2f; margin-bottom: 4px; }
+.msg-feedback .score-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 6px 0; }
+.msg-feedback .score-item { font-size: 13px; }
+.msg-feedback .score-item strong { font-size: 15px; }
+.msg-feedback .good { color: #2e7d32; }
+.msg-feedback .mid { color: #f57f17; }
+.msg-feedback .bad { color: #c62828; }
+.msg-feedback .model-trans { background: #e8f5e9; padding: 8px 12px; border-radius: 6px; margin-top: 6px; font-size: 13px; }
+
+/* Input area */
+#inputArea { border-top: 1px solid #e8eaed; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+#inputArea textarea { flex: 1; border: 1px solid #d0d5dd; border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; resize: none; font-family: inherit; min-height: 42px; max-height: 120px; }
+#inputArea textarea:focus { border-color: #1a73e8; }
+#inputArea .btn-send { background: #1a73e8; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; font-weight: 600; transition: background .2s; white-space: nowrap; }
+#inputArea .btn-send:hover { background: #1557b0; }
+#inputArea .btn-send:disabled { background: #93b8f0; cursor: not-allowed; }
+
+.loading-dots::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+/* Skill info card */
+#skillInfo { flex-shrink: 0; margin-bottom: 12px; }
+#skillInfo details { background: #fff; border-radius: 10px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); cursor: pointer; font-size: 13px; }
+#skillInfo summary { font-weight: 600; color: #1a73e8; }
+#skillInfo .info-content { margin-top: 8px; color: #555; line-height: 1.6; }
+#skillInfo .info-content li { margin-left: 18px; margin-bottom: 4px; }
+
+/* Buttons for actions */
+.action-btn { background: transparent; border: 1px solid #1a73e8; color: #1a73e8; border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin-right: 4px; transition: all .2s; }
+.action-btn:hover { background: #e8f0fe; }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+@media (max-width: 640px) {
+  header h1 { font-size: 18px; }
+  .container { padding: 10px; }
+  .msg { max-width: 92%; font-size: 13px; }
+}
+
+#apiConfig { display: none; }
+#apiConfig.show { display: flex; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>视译训练智能体</h1>
+  <p>Sight Translation AI Coach · 顺句驱动训练 · 人机协作 · 智能反馈</p>
+</header>
+
+<div class="container">
+  <!-- 技能说明（折叠） -->
+  <div id="skillInfo">
+    <details open>
+      <summary>关于本智能体：训练什么技能？</summary>
+      <div class="info-content">
+        <p><strong>训练目标：视译（Sight Translation）中的顺句驱动能力</strong></p>
+        <p>视译是口译的核心技能之一，要求译员在阅读源语文本的同时，快速将其转换为目标语并口头表达。</p>
+        <ul>
+          <li><strong>顺句驱动</strong>：按照源语的语序进行翻译，避免大的语序调整</li>
+          <li><strong>信息重组</strong>：在保持语序的前提下，使译文符合目标语表达习惯</li>
+          <li><strong>反应速度</strong>：从看到文本到开口翻译的时间间隔要短</li>
+        </ul>
+        <p style="margin-top:6px;color:#1a73e8;font-weight:600">点击下方「AI 设置」可配置 API Key 使用真实 AI 评估；留空则使用内置评估。</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- 设置栏 -->
+  <div id="settingsBar">
+    <span class="label">语言方向：</span>
+    <select id="langDir"><option value="zh-en">中→英</option><option value="en-zh">英→中</option></select>
+    <span class="label">主题：</span>
+    <select id="topic">
+      <option value="economy">经济</option><option value="technology">科技</option>
+      <option value="environment">环境</option><option value="diplomacy">外交</option><option value="culture">文化</option>
+    </select>
+    <span class="label">难度：</span>
+    <select id="difficulty">
+      <option value="easy">入门</option><option value="medium" selected>进阶</option><option value="hard">挑战</option>
+    </select>
+    <button class="action-btn" onclick="toggleApiConfig()">AI 设置</button>
+    <button class="action-btn" onclick="resetChat()">重新开始</button>
+    <input type="text" id="apiKey" placeholder="API Key (留空=内置评估)" style="width:180px;display:none" />
+  </div>
+
+  <!-- 聊天区 -->
+  <div id="chatArea">
+    <div id="messages"></div>
+    <div id="inputArea">
+      <textarea id="userInput" rows="1" placeholder="在此输入你的译文..." oninput="autoResize(this)"></textarea>
+      <button class="btn-send" id="sendBtn" onclick="sendMessage()">发送</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== 语料库 ==========
+const corpus = {
+  'zh-en': {
+    economy: { easy: ["中国经济在过去四十年里保持了高速增长。","国际贸易对全球经济发展具有重要意义。","许多国家正在加强区域经济合作。"], medium: ["在当前全球经济复苏乏力的背景下，各国央行纷纷采取宽松货币政策以刺激经济增长。","供应链的多元化和数字化转型正在重塑国际贸易格局，这对发展中国家既是机遇也是挑战。","区域全面经济伙伴关系协定（RCEP）的签署标志着亚太地区经济一体化迈出了关键一步。"], hard: ["在通胀压力与增长放缓的双重挑战下，各国政府需要在财政纪律与经济刺激之间寻求微妙的平衡，这对政策制定者的智慧提出了极高要求。","全球价值链的重构正在加速推进，地缘政治因素与技术创新共同驱动着这一趋势，企业必须重新评估其生产布局和市场策略。","数字经济的蓬勃发展正在重新定义传统的贸易模式，跨境数据流动的规则制定已成为新一轮国际贸易谈判的焦点议题。"] },
+    technology: { easy: ["人工智能正在改变我们的生活方式。","智能手机已经成为人们日常生活中不可或缺的工具。","科技创新是推动社会进步的重要力量。"], medium: ["人工智能在医疗诊断领域的应用正在快速发展，有望大幅提高疾病的早期诊断率。","量子计算技术的突破将为药物研发和材料科学带来革命性的变化。","数字化转型已经成为企业提升竞争力的核心战略，云计算和大数据技术在其中扮演着关键角色。"], hard: ["随着生成式人工智能技术的日趋成熟，关于其对就业市场结构性影响的讨论日益热烈，如何在推动技术创新与保障劳动者权益之间取得平衡成为各国面临的重要课题。","半导体产业的全球布局正经历深刻调整，技术主权与供应链安全的考量促使主要经济体纷纷加大本土芯片制造的投入力度。","脑机接口技术从实验室走向临床应用的过程中，不仅面临技术层面的挑战，更涉及深刻的伦理问题和监管框架的建构。"] },
+    environment: { easy: ["保护环境是我们每个人的责任。","可再生能源的利用有助于减少碳排放。","植树造林对于改善生态环境非常重要。"], medium: ["气候变化已经成为全球面临的最紧迫挑战之一，各国需要共同努力减少温室气体排放。","循环经济模式通过资源的再利用和再循环，为实现可持续发展提供了新的路径。","海洋塑料污染问题日益严重，国际社会正在加强合作寻求解决方案。"], hard: ["在实现碳中和目标的过程中，能源结构的转型不仅涉及技术变革，更需要政策体系、市场机制和社会共识的协同推进。","生物多样性的丧失与气候变化的叠加效应正在对全球生态系统造成前所未有的压力，保护区的建设和生态廊道的修复迫在眉睫。","碳边境调节机制的实施引发了关于公平贸易与气候正义的激烈辩论，发展中国家对这一机制可能带来的贸易壁垒表示深切关注。"] },
+    diplomacy: { easy: ["和平与发展是当今时代的主题。","世界各国应该加强对话与合作。","中国坚持走和平发展道路。"], medium: ["多边主义是维护国际秩序和国际关系基本准则的重要基石。","联合国在应对全球性挑战中发挥着不可替代的作用。","一带一路倡议促进了沿线国家的基础设施建设和经济合作。"], hard: ["在百年未有之大变局下，大国关系的复杂性日益凸显，竞争与合作交织并存，构建新型国际关系成为当务之急。","全球治理体系的改革已成为国际社会的普遍共识，新兴经济体和发展中国家在国际事务中的代表性和发言权亟待提升。","数字主权概念的兴起正在改变传统的地缘政治格局，各国围绕数据治理和网络安全的规则制定展开了激烈博弈。"] },
+    culture: { easy: ["文化交流是增进各国人民相互了解的重要桥梁。","中国传统节日蕴含着丰富的文化内涵。","教育是传承文化的重要途径。"], medium: ["非物质文化遗产的保护不仅需要政府的支持，更需要年轻一代的参与和传承。","跨文化沟通能力在全球化时代变得越来越重要，它不仅仅是语言能力的问题。","数字技术为传统文化的传播和保护提供了新的可能性。"], hard: ["在全球化与本土化的张力中，文化身份的建构成为一个复杂而动态的过程，各国都在努力维护文化多样性的同时推动文化创新。","文化软实力作为国家综合国力的重要组成部分，其影响力不仅取决于文化产品的输出，更在于价值观和叙事体系的吸引力。","人工智能生成内容对版权和创意产业的冲击正在引发深刻的文化政策讨论，如何在促进技术创新与保护创作者权益之间找到平衡点是一个紧迫的议题。"] }
+    },
+  'en-zh': {
+    economy: { easy: ["Global trade plays a vital role in economic development.","Small businesses are the backbone of many economies.","Inflation affects the purchasing power of consumers."], medium: ["Central banks around the world are carefully navigating the delicate balance between controlling inflation and supporting economic growth.","The rise of digital currencies is challenging traditional banking systems and prompting regulators to develop new frameworks.","Supply chain resilience has become a top priority for governments and corporations alike in the wake of recent global disruptions."], hard: ["The interplay between fiscal stimulus measures and monetary policy tightening creates a complex macroeconomic environment that requires careful calibration by policymakers.","The ongoing transformation of global financial architecture, driven by the emergence of new economic powers and technological innovation, is reshaping international capital flows.","Trade fragmentation along geopolitical lines poses significant risks to global economic stability, potentially leading to efficiency losses and reduced welfare gains from globalization."] },
+    technology: { easy: ["The internet has changed the way we communicate.","Technology plays a key role in modern education.","Electric vehicles are becoming more popular around the world."], medium: ["Artificial intelligence is revolutionizing industries ranging from healthcare to financial services.","The development of 5G networks is enabling new applications in autonomous driving and smart cities.","Cybersecurity has become a critical concern for both governments and businesses in the digital age."], hard: ["The rapid advancement of large language models has sparked intense debate about the potential risks and benefits of artificial general intelligence, prompting calls for responsible AI governance.","The convergence of biotechnology and information technology is opening up new frontiers in personalized medicine, while raising profound ethical questions about genetic privacy and human enhancement.","Quantum supremacy represents a paradigm shift in computational capability, with far-reaching implications for cryptography, drug discovery, and materials science."] },
+    environment: { easy: ["Protecting the environment is essential for future generations.","Solar and wind energy are clean sources of power.","Reducing waste is important for a sustainable future."], medium: ["The transition to a low-carbon economy requires significant investments in renewable energy infrastructure.","Nature-based solutions offer cost-effective ways to address climate change and biodiversity loss simultaneously.","Corporate sustainability reporting is becoming increasingly important for investors and stakeholders."], hard: ["The concept of planetary boundaries highlights the urgent need to align economic activities with the Earth's ecological limits, requiring a fundamental rethinking of our growth paradigms.","Climate adaptation strategies must be integrated into urban planning and infrastructure development to build resilience against increasingly frequent extreme weather events.","The tension between economic development and environmental conservation is particularly acute in developing countries, where the pursuit of poverty reduction must be reconciled with climate commitments."] },
+    diplomacy: { easy: ["Dialogue is the best way to resolve international disputes.","Cultural exchange programs help build bridges between nations.","International cooperation is essential for addressing global challenges."], medium: ["The rules-based international order is facing unprecedented challenges from multiple directions.","Public diplomacy has become an increasingly important tool for countries to project soft power.","Regional multilateral institutions are playing a growing role in global governance."], hard: ["The diffusion of power in the international system is creating both opportunities and challenges for global governance, as traditional and emerging powers navigate a more complex geopolitical landscape.","Strategic competition in the Indo-Pacific region is intensifying, with implications for regional security architectures and economic integration frameworks.","The weaponization of economic interdependence through sanctions and export controls is reshaping the dynamics of international relations."] },
+    culture: { easy: ["Music and art are universal languages that connect people.","Learning about different cultures broadens our horizons.","Festivals around the world celebrate diverse cultural traditions."], medium: ["Cultural heritage preservation faces new challenges in the digital age, from copyright issues to digital divide concerns.","The global popularity of K-pop and other cultural exports demonstrates the power of cultural soft power.","Museums are increasingly using digital technologies to make their collections more accessible to global audiences."], hard: ["The tension between cultural homogenization and cultural diversification in the age of global streaming platforms raises fundamental questions about cultural sovereignty and identity preservation.","Repatriation of cultural artifacts has become a major issue in international cultural relations, reflecting broader debates about colonial legacies and restorative justice.","The intersection of artificial intelligence and creative industries is challenging traditional notions of authorship and creativity."] }
+  }
+};
+
+// ========== 状态 ==========
+let state = {
+  usingMock: true,
+  currentText: '',
+  textsInTopic: [],
+  currentIdx: 0,
+  round: 0,
+  totalRounds: 0,
+  correctCount: 0,
+  history: JSON.parse(localStorage.getItem('stHistory2') || '[]'),
+  waitingForResponse: false
+};
+
+// ========== 工具函数 ==========
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2000);
+}
+
+function pickTexts() {
+  const dir = document.getElementById('langDir').value;
+  const topic = document.getElementById('topic').value;
+  const diff = document.getElementById('difficulty').value;
+  const pool = (corpus[dir]?.[topic]?.[diff] || []).sort(() => Math.random() - 0.5);
+  return pool;
+}
+
+function toggleApiConfig() {
+  const k = document.getElementById('apiKey');
+  k.style.display = k.style.display === 'none' ? 'inline-block' : 'none';
+  if (k.style.display === 'none') { k.value = ''; state.usingMock = true; }
+}
+
+function scrollToBottom() {
+  const msgs = document.getElementById('messages');
+  setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 50);
+}
+
+function disableInput(disabled) {
+  document.getElementById('userInput').disabled = disabled;
+  document.getElementById('sendBtn').disabled = disabled;
+  state.waitingForResponse = disabled;
+}
+
+// ========== 消息渲染 ==========
+function addCoachMsg(html) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-coach';
+  div.innerHTML = '<div class="name">视译教练</div>' + html;
+  document.getElementById('messages').appendChild(div);
+  scrollToBottom();
+}
+
+function addUserMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-user';
+  const time = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `<div class="name">我 (${time})</div><div>${escapeHtml(text)}</div>`;
+  document.getElementById('messages').appendChild(div);
+  scrollToBottom();
+}
+
+function addFeedbackMsg(html) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-feedback';
+  div.innerHTML = '<div class="name">AI 评估反馈</div>' + html;
+  document.getElementById('messages').appendChild(div);
+  scrollToBottom();
+}
+
+function addSystemMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'msg msg-system';
+  div.textContent = text;
+  document.getElementById('messages').appendChild(div);
+  scrollToBottom();
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+// ========== 训练流程 ==========
+function startTraining() {
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+
+  state.round = 0;
+  state.totalRounds = 0;
+  state.correctCount = 0;
+  state.currentIdx = 0;
+
+  const dir = document.getElementById('langDir').value;
+  const langLabel = dir === 'zh-en' ? '中文 → 英文' : '英文 → 中文';
+  const diffEl = document.getElementById('difficulty');
+  const diffLabel = diffEl.options[diffEl.selectedIndex].text;
+  const topicEl = document.getElementById('topic');
+  const topicLabel = topicEl.options[topicEl.selectedIndex].text;
+
+  addCoachMsg(`欢迎来到视译训练！<br><br>
+    <b>训练目标：</b>提升顺句驱动视译能力 — 按照源语语序快速口译，同时保证译文自然通顺<br>
+    <b>当前设置：</b>${langLabel} · ${topicLabel} · ${diffLabel}<br><br>
+    我会逐句给你源语文本，你将其口译为目标语后输入即可。每轮我会给出评估反馈和示范译文。<br>
+    <span style="color:#888">准备好了吗？发送任意消息开始第一题！</span>`);
+
+  state.textsInTopic = pickTexts();
+  state.currentText = state.textsInTopic[0] || '';
+  state.waitingForFirst = true;
+  disableInput(false);
+  document.getElementById('userInput').focus();
+}
+
+function presentNextText() {
+  if (state.textsInTopic.length === 0) {
+    state.textsInTopic = pickTexts();
+  }
+
+  state.currentIdx++;
+  if (state.currentIdx >= state.textsInTopic.length) {
+    state.textsInTopic = pickTexts();
+    state.currentIdx = 0;
+  }
+  state.currentText = state.textsInTopic[state.currentIdx];
+  state.round++;
+
+  const dir = document.getElementById('langDir').value;
+  const langLabel = dir === 'zh-en' ? '【中→英】' : '【英→中】';
+
+  addCoachMsg(`<span class="source-tag">第 ${state.round} 题 ${langLabel}</span><br>
+    <b>源语文本：</b><br>
+    <span style="font-size:16px">${escapeHtml(state.currentText)}</span><br><br>
+    <span style="color:#888;font-size:13px">请将上述文本口译为目标语，输入你的译文：</span>`);
+
+  disableInput(false);
+  document.getElementById('userInput').focus();
+}
+
+// ========== 发送消息 ==========
+async function sendMessage() {
+  if (state.waitingForResponse) return;
+
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (state.waitingForFirst) {
+    state.waitingForFirst = false;
+    input.value = '';
+    presentNextText();
+    return;
+  }
+
+  input.value = '';
+  autoResize(input);
+
+  addUserMsg(text);
+  disableInput(true);
+
+  const key = document.getElementById('apiKey').value.trim();
+  state.usingMock = !key;
+
+  if (state.usingMock) {
+    setTimeout(() => doMockEval(text), 600);
+  } else {
+    await doAIEval(text);
+  }
+}
+
+// ========== 模拟评估 ==========
+function doMockEval(userText) {
+  const scores = genMockScores(userText, state.currentText);
+  showFeedback(scores, userText, '');
+}
+
+function genMockScores(userText, source) {
+  const acc = Math.floor(62 + Math.random() * 30);
+  const flu = Math.floor(60 + Math.random() * 30);
+  const lang = Math.floor(60 + Math.random() * 28);
+  const comp = Math.floor(62 + Math.random() * 28);
+  const total = Math.round((acc + flu + lang + comp) / 4);
+
+  let fb = '';
+  if (acc >= 88) fb += '✅ 信息准确度高，核心信息完整传达。';
+  else if (acc >= 72) fb += '⚠️ 主要信息已传达，部分细节可以更精确。';
+  else fb += '❌ 信息有较多遗漏或偏差，建议对照原文逐句核对。';
+
+  if (flu >= 85) fb += ' 表达流畅自然，符合顺句驱动原则。';
+  else if (flu >= 70) fb += ' 整体较流畅，部分句式可以更紧凑。';
+  else fb += ' 流畅度需提高，建议多做顺句驱动练习。';
+
+  if (comp >= 85) fb += ' 信息完整，没有明显遗漏。';
+  else if (comp >= 70) fb += ' 主要信息已覆盖，个别细节可补充。';
+  else fb += ' 信息完整性不足，注意把握句子主干。';
+
+  const model = genMockModel(source);
+  return { accuracy: acc, fluency: flu, language: lang, completeness: comp, total, feedback: fb, modelTranslation: model };
+}
+
+function genMockModel(source) {
+  const models = {
+    "中国经济在过去四十年里保持了高速增长。": "China's economy has maintained rapid growth over the past four decades.",
+    "国际贸易对全球经济发展具有重要意义。": "International trade plays a significant role in global economic development.",
+    "许多国家正在加强区域经济合作。": "Many countries are strengthening regional economic cooperation.",
+    "Global trade plays a vital role in economic development.": "全球贸易在经济发展中发挥着重要作用。",
+    "Small businesses are the backbone of many economies.": "小企业是许多经济体的支柱。",
+    "Inflation affects the purchasing power of consumers.": "通货膨胀影响着消费者的购买力。"
+  };
+  return models[source] || source.length > 20
+    ? '(示范译文：参考上方反馈中的建议，尝试在顺句驱动和信息重组之间找到最佳平衡。)'
+    : '(示范译文略)';
+}
+
+// ========== AI 评估 ==========
+async function doAIEval(userText) {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const apiUrl = 'https://api.openai.com/v1';
+  const dir = document.getElementById('langDir').value;
+  const langPair = dir === 'zh-en' ? '中文→英文' : '英文→中文';
+
+  const prompt = `你是一位专业的口译评估导师。请评估这段视译练习。
+
+源语文本：${state.currentText}
+用户译文：${userText}
+语言方向：${langPair}
+训练技能：视译（顺句驱动）
+
+请从以下四个维度评分（0-100），并给出详细反馈：
+1. 信息准确度：译文是否准确传达原文信息
+2. 表达流畅度：译文是否符合目标语表达习惯
+3. 语言质量：用词语法是否规范
+4. 信息完整性：有无重要遗漏
+
+同时给出一个示范译文。
+
+以 JSON 格式输出：
+{"accuracy":数字,"fluency":数字,"language":数字,"completeness":数字,"total":平均分,"feedback":"详细中文反馈","modelTranslation":"示范译文"}`;
+
+  try {
+    const resp = await fetch(apiUrl + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini', messages: [
+          { role: 'system', content: '你是一名专业口译评估导师。请严格按JSON格式输出。' },
+          { role: 'user', content: prompt }
+        ], temperature: 0.3, max_tokens: 1500
+      })
+    });
+
+    if (!resp.ok) throw new Error(`API 请求失败 (${resp.status})`);
+
+    const data = await resp.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const result = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+
+    if (!result || typeof result.accuracy !== 'number') throw new Error('格式错误');
+
+    showFeedback(result, userText, result.modelTranslation || '');
+  } catch (err) {
+    toast('AI 评估失败，使用内置评估：' + err.message);
+    doMockEval(userText);
+  }
+}
+
+// ========== 展示评估结果 ==========
+function showFeedback(scores, userText, modelTrans) {
+  const total = scores.total || Math.round((scores.accuracy + scores.fluency + scores.language + scores.completeness) / 4);
+
+  const scoreClass = (s) => s >= 85 ? 'good' : s >= 70 ? 'mid' : 'bad';
+
+  let html = `
+    <div class="score-row">
+      <span class="score-item">信息准确度：<strong class="${scoreClass(scores.accuracy)}">${scores.accuracy}</strong></span>
+      <span class="score-item">表达流畅度：<strong class="${scoreClass(scores.fluency)}">${scores.fluency}</strong></span>
+      <span class="score-item">语言质量：<strong class="${scoreClass(scores.language)}">${scores.language}</strong></span>
+      <span class="score-item">信息完整性：<strong class="${scoreClass(scores.completeness)}">${scores.completeness}</strong></span>
+      <span class="score-item">综合：<strong>${total}</strong></span>
+    </div>
+    <div style="margin:8px 0">${escapeHtml(scores.feedback || '暂无反馈')}</div>`;
+
+  if (modelTrans) {
+    html += `<div class="model-trans"><strong>示范译文：</strong>${escapeHtml(modelTrans)}</div>`;
+  }
+
+  html += `<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+    <button class="action-btn" onclick="presentNextText()">下一题 →</button>
+    <button class="action-btn" onclick="skipToReflect()">本次总结</button>
+  </div>`;
+
+  addFeedbackMsg(html);
+
+  state.totalRounds++;
+
+  // 保存到历史
+  state.history.push({
+    time: new Date().toLocaleString('zh-CN'),
+    langDir: document.getElementById('langDir').value,
+    topic: document.getElementById('topic').value,
+    sourceText: state.currentText,
+    userTranslation: userText,
+    scores: { accuracy: scores.accuracy, fluency: scores.fluency, language: scores.language, completeness: scores.completeness, total },
+    modelTranslation: modelTrans || ''
+  });
+  localStorage.setItem('stHistory2', JSON.stringify(state.history));
+
+  disableInput(false);
+}
+
+function skipToReflect() {
+  const last = state.history[state.history.length - 1];
+  if (!last) { toast('暂无训练数据'); return; }
+  const avg = last.scores.total;
+  const total = state.totalRounds;
+
+  let comment = avg >= 85 ? '表现优秀！顺句驱动能力扎实。' : avg >= 70 ? '表现良好，有提升空间，继续保持训练。' : '还需要加强基础训练，建议从入门难度开始。';
+
+  addCoachMsg(`<b>本轮训练小结</b><br><br>
+    已完成 ${total} 题练习<br>
+    最近一题综合评分：<b>${avg}</b> 分<br><br>
+    ${comment}<br><br>
+    <span style="color:#888">可以继续训练或点击「重新开始」切换设置。</span>`);
+}
+
+function resetChat() {
+  if (state.totalRounds > 0 && !confirm('确定重新开始？当前训练记录会保留。')) return;
+  state.waitingForFirst = true;
+  startTraining();
+}
+
+// ========== 初始化 ==========
+startTraining();
+</script>
+</body>
+</html>
