@@ -723,13 +723,21 @@ function presentNextText() {
   const langLabel = dir === 'zh-en' ? '【中→英】' : '【英→中】';
 
   addCoachMsg(`<span class="tag">第 ${state.round} 题 ${langLabel}</span>
-    <b>🔊 语音正在播报源语，请仔细听辨...</b><br>
-    <span style="color:#888;font-size:12px">（原文将在你口译完成后展示，模拟真实交传场景）</span>`);
+    <b>点击下方按钮播放源语：</b><br>
+    <span style="color:#888;font-size:12px">（原文将在你口译完成后展示）</span>
+    <div style="margin-top:10px">
+      <button class="action-btn play-btn" onclick="playAndEnable(this)" style="font-size:14px;padding:8px 20px">▶ 播放源语</button>
+    </div>`);
 
   disableInput(true);
   document.getElementById('micBtn').disabled = true;
+}
 
+function playAndEnable(btn) {
+  if (!btn) btn = document.querySelector('.play-btn:not(:disabled)');
+  if (btn) { btn.textContent = '🔊 播放中...'; btn.disabled = true; btn.style.opacity = '0.6'; }
   speakText(state.currentText, function() {
+    if (btn) { btn.textContent = '✅ 已播放'; }
     addCoachMsg(`<span style="color:#0d47a1">✅ 播报完毕！现在凭记忆进行口译。请点击「🎤 开始口译」或手动输入译文。</span>`);
     disableInput(false);
     document.getElementById('micBtn').disabled = false;
